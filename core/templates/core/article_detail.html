@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ article.title }} — Ethiopian Daily</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=Noto+Sans+Ethiopic:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { DEFAULT: '#2563eb', light: '#60a5fa' },
+          },
+          fontFamily: {
+            sans:    ['"Plus Jakarta Sans"', '"Noto Sans Ethiopic"', 'system-ui', 'sans-serif'],
+            serif:   ['Lora', '"Noto Serif Ethiopic"', 'Georgia', 'serif'],
+            display: ['"Playfair Display"', '"Noto Serif Ethiopic"', 'Georgia', 'serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    body.data-saver img, body.data-saver video, body.data-saver iframe, body.data-saver figure { display: none !important; }
+  </style>
+  <script>
+    if (localStorage.getItem('dataSaver') === '1') document.documentElement.style.visibility='hidden';
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('dataSaver') === '1') document.body.classList.add('data-saver');
+      document.documentElement.style.visibility = '';
+      updateDataSaverBtn();
+    });
+    function toggleDataSaver() {
+      const on = document.body.classList.toggle('data-saver');
+      localStorage.setItem('dataSaver', on ? '1' : '0');
+      updateDataSaverBtn();
+    }
+    function updateDataSaverBtn() {
+      const on = document.body.classList.contains('data-saver');
+      const btn = document.getElementById('ds-btn');
+      if (!btn) return;
+      btn.classList.toggle('bg-white/30', on);
+      const label = document.getElementById('ds-label');
+      if (label) label.textContent = on ? 'Text Only' : 'Data Saver';
+    }
+  </script>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+
+<!-- Header (minimal) -->
+<header class="bg-brand text-white shadow-xl sticky top-0 z-50 relative overflow-hidden">
+  <!-- Tibeb background pattern -->
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="tibeb" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
+          <polygon points="24,2 46,24 24,46 2,24" fill="none" stroke="white" stroke-width="1.8"/>
+          <polygon points="24,12 36,24 24,36 12,24" fill="white" fill-opacity="0.08" stroke="white" stroke-width="1.1"/>
+          <circle cx="24" cy="24" r="2.5" fill="white"/>
+          <circle cx="0"  cy="0"  r="2.5" fill="white"/>
+          <circle cx="48" cy="0"  r="2.5" fill="white"/>
+          <circle cx="0"  cy="48" r="2.5" fill="white"/>
+          <circle cx="48" cy="48" r="2.5" fill="white"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#tibeb)" opacity="0.14"/>
+    </svg>
+  </div>
+  <div class="relative max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="{% url 'core:homepage' %}" class="flex items-center gap-2.5 group">
+      <!-- Embilta (Ethiopian herald horn player) -->
+      <svg class="h-8 w-8 shrink-0 transition group-hover:scale-110" viewBox="0 0 36 36" fill="none">
+        <polygon points="10.5,18.5 11,21.5 36,9.5 33,3" fill="white" fill-opacity="0.95"/>
+        <path d="M33 3 Q39.5 6.5 36 9.5" fill="white" fill-opacity="0.95"/>
+        <circle cx="7" cy="20" r="3.2" fill="white"/>
+        <path d="M7 23.5 C5 28 4.5 32 6.5 36" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <path d="M9 22 L11 19.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <path d="M9.5 24 L15 22" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M36.5 6 Q40 4 38 9.5" stroke="white" stroke-width="1.2" fill="none" opacity="0.6" stroke-linecap="round"/>
+        <path d="M37 5 Q42.5 3 40 10.5" stroke="white" stroke-width="0.9" fill="none" opacity="0.3" stroke-linecap="round"/>
+      </svg>
+      <span class="font-display font-bold text-base tracking-tight">Ethiopian Daily</span>
+    </a>
+    <div class="flex items-center gap-3">
+      {% if can_edit %}
+      <a href="{% url 'core:article_edit' article.slug %}"
+         class="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
+        Edit
+      </a>
+      {% endif %}
+      <button id="ds-btn" onclick="toggleDataSaver()"
+              class="flex items-center gap-1.5 text-xs font-medium text-white/60 hover:text-white border border-white/20 rounded-full px-2.5 py-1 transition">
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+        </svg>
+        <span id="ds-label">Data Saver</span>
+      </button>
+      <a href="{% url 'core:homepage' %}" class="text-sm text-white/60 hover:text-white transition flex items-center gap-1">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Home
+      </a>
+    </div>
+  </div>
+  <div class="h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-10">
+
+  <!-- Category + Breadcrumb -->
+  {% if article.category %}
+  <div class="mb-4">
+    <span class="inline-block bg-brand text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded">
+      {{ article.category.name }}
+    </span>
+  </div>
+  {% endif %}
+
+  <!-- Headline -->
+  <h1 class="font-display font-bold text-3xl md:text-4xl text-gray-900 leading-tight mb-4">
+    {{ article.title }}
+  </h1>
+
+  <!-- Summary / standfirst -->
+  <p class="text-xl text-gray-600 font-serif leading-relaxed border-l-4 border-brand pl-4 mb-6">
+    {{ article.summary }}
+  </p>
+
+  <!-- Meta -->
+  <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 pb-6 border-b border-gray-200 mb-8">
+    {% if article.author %}
+    <div class="flex items-center gap-2">
+      <div class="h-8 w-8 rounded-full bg-brand text-white text-xs font-bold flex items-center justify-center uppercase">
+        {{ article.author.email|first }}
+      </div>
+      <span class="font-medium text-gray-700">{{ article.author.get_full_name|default:article.author.email }}</span>
+    </div>
+    <span>·</span>
+    {% endif %}
+    <span>{{ article.published_at|date:"N j, Y · g:i a" }}</span>
+    <span>·</span>
+    <span>{{ article.reading_time }} min read</span>
+    <span>·</span>
+    <span class="flex items-center gap-1">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+      </svg>
+      {{ article.views_count }} views
+    </span>
+  </div>
+
+  <!-- Video player -->
+  {% if article.embed_video_url %}
+  <div class="mb-8">
+    {% if article.video_url|lower|slice:"-4:" == ".mp4" or article.video_url|lower|slice:"-5:" == ".webm" or article.video_url|lower|slice:"-4:" == ".ogg" %}
+    <video controls class="w-full rounded-xl shadow max-h-[28rem] bg-black">
+      <source src="{{ article.embed_video_url }}">
+      Your browser does not support video playback.
+    </video>
+    {% else %}
+    <div class="relative w-full rounded-xl shadow overflow-hidden" style="padding-top:56.25%">
+      <iframe src="{{ article.embed_video_url }}"
+              class="absolute inset-0 w-full h-full"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen>
+      </iframe>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Hero image (only if no video) -->
+  {% if article.image_url and not article.embed_video_url %}
+  <figure class="mb-8 overflow-hidden rounded-xl shadow">
+    <img src="{{ article.image_url }}" alt="{{ article.title }}" class="w-full object-cover max-h-[28rem]">
+  </figure>
+  {% endif %}
+
+  <!-- Article body -->
+  <div class="prose prose-lg max-w-none font-serif text-gray-800 leading-relaxed space-y-5">
+    {{ article.content|linebreaksbr }}
+  </div>
+
+  <!-- Reactions -->
+  <div class="mt-10 pt-6 border-t border-gray-200">
+    <p class="text-sm font-semibold text-gray-600 mb-3">How did this story make you feel?</p>
+    <div class="flex flex-wrap gap-2" id="reaction-buttons">
+      <button data-reaction="like" onclick="sendReaction('like')"
+        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'like' %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+        <span class="text-lg leading-none">👍</span><span id="count-like">{{ reaction_counts.like }}</span>
+      </button>
+      <button data-reaction="love" onclick="sendReaction('love')"
+        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'love' %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+        <span class="text-lg leading-none">❤️</span><span id="count-love">{{ reaction_counts.love }}</span>
+      </button>
+      <button data-reaction="wow" onclick="sendReaction('wow')"
+        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'wow' %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+        <span class="text-lg leading-none">😮</span><span id="count-wow">{{ reaction_counts.wow }}</span>
+      </button>
+      <button data-reaction="sad" onclick="sendReaction('sad')"
+        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'sad' %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+        <span class="text-lg leading-none">😢</span><span id="count-sad">{{ reaction_counts.sad }}</span>
+      </button>
+      <button data-reaction="angry" onclick="sendReaction('angry')"
+        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'angry' %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+        <span class="text-lg leading-none">😡</span><span id="count-angry">{{ reaction_counts.angry }}</span>
+      </button>
+    </div>
+    {% if not user.is_authenticated %}
+    <p class="text-xs text-gray-400 mt-2">
+      <a href="{% url 'users:login' %}?next={{ request.path }}" class="text-brand hover:underline">Sign in</a> to leave a reaction.
+    </p>
+    {% endif %}
+  </div>
+
+  <!-- Tags -->
+  {% if article.category %}
+  <div class="mt-10 pt-6 border-t border-gray-200 flex items-center gap-2 flex-wrap">
+    <span class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Topics:</span>
+    <a href="{% url 'core:homepage' %}#section-{{ article.category.slug }}"
+       class="px-3 py-1 bg-gray-100 hover:bg-brand hover:text-white text-gray-700 text-xs font-medium rounded-full transition">
+      {{ article.category.name }}
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Related articles -->
+  {% if related %}
+  <section class="mt-12 pt-8 border-t border-gray-200">
+    <h2 class="text-lg font-bold text-brand border-b-4 border-brand pb-1 inline-block pr-4 mb-6">
+      Related Stories
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      {% for r in related %}
+      <a href="{% url 'core:article_detail' r.slug %}"
+         class="group bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition">
+        {% if r.image_url %}
+        <img src="{{ r.image_url }}" alt="{{ r.title }}" class="w-full h-32 object-cover">
+        {% else %}
+        <div class="w-full h-32 bg-gradient-to-br from-brand to-blue-800"></div>
+        {% endif %}
+        <div class="p-3">
+          {% if r.category %}
+          <span class="text-xs font-bold uppercase tracking-wide text-brand">{{ r.category.name }}</span>
+          {% endif %}
+          <h3 class="font-semibold text-gray-900 text-sm leading-snug mt-1 line-clamp-2 group-hover:text-brand transition">
+            {{ r.title }}
+          </h3>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</main>
+
+<script>
+  const REACT_URL = "{% url 'core:react_to_article' article.slug %}";
+  const IS_AUTH   = {{ user.is_authenticated|yesno:"true,false" }};
+  const CSRF      = "{{ csrf_token }}";
+
+  function sendReaction(type) {
+    if (!IS_AUTH) {
+      window.location.href = "{% url 'users:login' %}?next={{ request.path }}";
+      return;
+    }
+    fetch(REACT_URL, {
+      method: "POST",
+      headers: {"Content-Type": "application/x-www-form-urlencoded", "X-CSRFToken": CSRF},
+      body: "reaction=" + type,
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) return;
+      // Update counts
+      for (const [key, val] of Object.entries(data.counts)) {
+        const el = document.getElementById("count-" + key);
+        if (el) el.textContent = val;
+      }
+      // Update button styles
+      document.querySelectorAll(".reaction-btn").forEach(btn => {
+        const active = btn.dataset.reaction === data.user_reaction;
+        btn.classList.toggle("bg-brand", active);
+        btn.classList.toggle("text-white", active);
+        btn.classList.toggle("border-brand", active);
+        btn.classList.toggle("bg-white", !active);
+        btn.classList.toggle("text-gray-600", !active);
+        btn.classList.toggle("border-gray-200", !active);
+      });
+    });
+  }
+</script>
+
+<!-- Simple footer -->
+<footer class="bg-brand text-blue-300 text-center text-xs py-6 mt-12">
+  <p>© {% now "Y" %} Ethiopian Daily · <a href="{% url 'core:homepage' %}" class="hover:text-white transition">Back to Homepage</a></p>
+</footer>
+
+</body>
+</html>

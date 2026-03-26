@@ -1,0 +1,157 @@
+{% extends "core/cms_base.html" %}
+{% block title %}My Articles{% endblock %}
+{% block page_title %}{% if user.is_admin %}All Articles{% else %}My Articles{% endif %}{% endblock %}
+{% block page_subtitle %}Manage drafts and track submissions through the review pipeline{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'core:article_create' %}"
+   class="flex items-center gap-2 bg-brand text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-900 transition">
+  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+  </svg>
+  New Article
+</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Stats -->
+<div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
+  <a href="?status=" class="bg-white rounded-xl border {% if not current_status %}border-brand ring-1 ring-brand{% else %}border-gray-200 hover:border-gray-300{% endif %} shadow-sm p-4 transition">
+    <p class="text-2xl font-bold text-gray-900">
+      {{ counts.draft|add:counts.submitted|add:counts.in_review|add:counts.published|add:counts.rejected }}
+    </p>
+    <p class="text-xs text-gray-500 mt-0.5">All</p>
+  </a>
+  <a href="?status=draft" class="bg-white rounded-xl border {% if current_status == 'draft' %}border-brand ring-1 ring-brand{% else %}border-gray-200 hover:border-gray-300{% endif %} shadow-sm p-4 transition">
+    <p class="text-2xl font-bold text-gray-700">{{ counts.draft }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Draft</p>
+  </a>
+  <a href="?status=submitted" class="bg-white rounded-xl border {% if current_status == 'submitted' %}border-brand ring-1 ring-brand{% else %}border-gray-200 hover:border-gray-300{% endif %} shadow-sm p-4 transition">
+    <p class="text-2xl font-bold text-amber-600">{{ counts.submitted }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Submitted</p>
+  </a>
+  <a href="?status=published" class="bg-white rounded-xl border {% if current_status == 'published' %}border-brand ring-1 ring-brand{% else %}border-gray-200 hover:border-gray-300{% endif %} shadow-sm p-4 transition">
+    <p class="text-2xl font-bold text-green-600">{{ counts.published }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Published</p>
+  </a>
+  <a href="?status=rejected" class="bg-white rounded-xl border {% if current_status == 'rejected' %}border-brand ring-1 ring-brand{% else %}border-gray-200 hover:border-gray-300{% endif %} shadow-sm p-4 transition">
+    <p class="text-2xl font-bold text-red-500">{{ counts.rejected }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Rejected</p>
+  </a>
+</div>
+
+<!-- Article table -->
+{% if articles %}
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="bg-gray-50 border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wide">
+        <th class="px-5 py-3 text-left font-semibold">Article</th>
+        <th class="px-5 py-3 text-left font-semibold hidden md:table-cell">Category</th>
+        {% if user.is_admin %}<th class="px-5 py-3 text-left font-semibold hidden lg:table-cell">Author</th>{% endif %}
+        <th class="px-5 py-3 text-left font-semibold">Status</th>
+        <th class="px-5 py-3 text-left font-semibold hidden lg:table-cell">Updated</th>
+        <th class="px-5 py-3 text-right font-semibold">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for article in articles %}
+      <tr class="hover:bg-gray-50 transition">
+
+        <td class="px-5 py-4 max-w-xs">
+          <p class="font-semibold text-gray-900 line-clamp-1">{{ article.title }}</p>
+          <p class="text-gray-400 text-xs mt-0.5 line-clamp-1">{{ article.summary }}</p>
+        </td>
+
+        <td class="px-5 py-4 hidden md:table-cell">
+          {% if article.category %}
+          <span class="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">{{ article.category.name }}</span>
+          {% else %}<span class="text-gray-300 text-xs">—</span>{% endif %}
+        </td>
+
+        {% if user.is_admin %}
+        <td class="px-5 py-4 hidden lg:table-cell text-xs text-gray-500">
+          {{ article.author.email|default:"—" }}
+        </td>
+        {% endif %}
+
+        <td class="px-5 py-4">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold
+            {% if article.status == 'published' %}bg-green-100 text-green-700
+            {% elif article.status == 'rejected' %}bg-red-100 text-red-700
+            {% elif article.status == 'submitted' %}bg-amber-100 text-amber-700
+            {% elif article.status == 'in_review' %}bg-blue-100 text-blue-700
+            {% else %}bg-gray-100 text-gray-600{% endif %}">
+            <span class="h-1.5 w-1.5 rounded-full
+              {% if article.status == 'published' %}bg-green-500
+              {% elif article.status == 'rejected' %}bg-red-500
+              {% elif article.status == 'submitted' %}bg-amber-500
+              {% elif article.status == 'in_review' %}bg-blue-500
+              {% else %}bg-gray-400{% endif %}"></span>
+            {{ article.get_status_display }}
+          </span>
+        </td>
+
+        <td class="px-5 py-4 text-gray-500 text-xs hidden lg:table-cell">{{ article.updated_at|timesince }} ago</td>
+
+        <td class="px-5 py-4 text-right">
+          <div class="flex items-center justify-end gap-3">
+            {% if article.status == 'draft' or article.status == 'rejected' %}
+              <a href="{% url 'core:article_edit' article.slug %}"
+                 class="text-xs font-medium text-brand hover:text-brand transition">Edit</a>
+              <form method="post" action="{% url 'core:article_submit' article.slug %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="text-xs font-medium text-amber-600 hover:text-amber-800 transition">
+                  Submit
+                </button>
+              </form>
+            {% endif %}
+
+            {% if article.status == 'submitted' %}
+              <form method="post" action="{% url 'core:article_withdraw' article.slug %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="text-xs font-medium text-gray-500 hover:text-gray-800 transition">
+                  Withdraw
+                </button>
+              </form>
+            {% endif %}
+
+            {% if article.status == 'in_review' %}
+              <span class="text-xs text-blue-500 font-medium">Under review…</span>
+            {% endif %}
+
+            {% if article.status == 'published' %}
+              <a href="{% url 'core:article_detail' article.slug %}" target="_blank"
+                 class="text-xs font-medium text-green-600 hover:text-green-800 transition">View Live ↗</a>
+            {% endif %}
+
+            {% if article.status == 'draft' %}
+              <form method="post" action="{% url 'core:article_delete' article.slug %}"
+                    onsubmit="return confirm('Delete this draft permanently?')" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="text-xs font-medium text-red-400 hover:text-red-600 transition">Delete</button>
+              </form>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<div class="bg-white rounded-xl border border-dashed border-gray-200 py-20 text-center">
+  <svg class="h-10 w-10 text-gray-200 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+  </svg>
+  <p class="text-gray-400 text-sm">No articles found.</p>
+  <a href="{% url 'core:article_create' %}" class="mt-3 inline-block text-brand text-sm font-medium hover:underline">
+    Write your first article →
+  </a>
+</div>
+{% endif %}
+
+{% endblock %}

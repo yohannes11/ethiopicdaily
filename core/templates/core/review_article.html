@@ -1,0 +1,220 @@
+{% extends "core/cms_base.html" %}
+{% block title %}Review: {{ article.title|truncatechars:40 }}{% endblock %}
+{% block page_title %}Review Article{% endblock %}
+{% block page_subtitle %}{{ article.get_status_display }} · {{ article.reading_time }} min read{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'core:review_queue' %}"
+   class="text-sm text-gray-500 hover:text-gray-800 transition flex items-center gap-1">
+  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+  </svg>
+  Back to Queue
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col xl:flex-row gap-6 items-start">
+
+  <!-- ── Article Preview (left/main) ── -->
+  <div class="flex-1 min-w-0">
+    <article class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+
+      <!-- Cover image -->
+      {% if article.image_url %}
+      <div class="h-64 overflow-hidden">
+        <img src="{{ article.image_url }}" alt="{{ article.title }}" class="w-full h-full object-cover">
+      </div>
+      {% endif %}
+
+      <div class="p-6 md:p-8">
+
+        <!-- Category + meta -->
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          {% if article.category %}
+          <span class="bg-brand text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded">
+            {{ article.category.name }}
+          </span>
+          {% endif %}
+          <span class="text-xs text-gray-400">{{ article.published_at|date:"N j, Y" }}</span>
+          <span class="text-xs text-gray-400">·</span>
+          <span class="text-xs text-gray-400">{{ article.reading_time }} min read</span>
+          {% if article.author %}
+          <span class="text-xs text-gray-400">·</span>
+          <span class="text-xs text-gray-500 font-medium">By {{ article.author.get_full_name|default:article.author.email }}</span>
+          {% endif %}
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-2xl md:text-3xl font-display font-bold text-gray-900 leading-tight mb-4">
+          {{ article.title }}
+        </h1>
+
+        <!-- Summary -->
+        <p class="text-lg text-gray-600 font-serif border-l-4 border-brand pl-4 mb-6 leading-relaxed">
+          {{ article.summary }}
+        </p>
+
+        <!-- Body -->
+        <div class="text-base text-gray-800 font-serif leading-relaxed space-y-4">
+          {{ article.content|linebreaksbr }}
+        </div>
+
+      </div>
+    </article>
+  </div>
+
+  <!-- ── Review Panel (right/sidebar) ── -->
+  <div class="xl:w-80 shrink-0 space-y-5 xl:sticky xl:top-4">
+
+    <!-- Article info card -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Article Info</h3>
+      <dl class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <dt class="text-gray-400">Author</dt>
+          <dd class="font-medium text-gray-700">{{ article.author.get_full_name|default:article.author.email|default:"Unknown" }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-gray-400">Category</dt>
+          <dd class="font-medium text-gray-700">{{ article.category.name|default:"—" }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-gray-400">Status</dt>
+          <dd>
+            <span class="font-semibold
+              {% if article.status == 'in_review' %}text-blue-600
+              {% elif article.status == 'submitted' %}text-amber-600
+              {% else %}text-gray-700{% endif %}">
+              {{ article.get_status_display }}
+            </span>
+          </dd>
+        </div>
+        {% if article.submitted_at %}
+        <div class="flex justify-between">
+          <dt class="text-gray-400">Submitted</dt>
+          <dd class="text-gray-700">{{ article.submitted_at|timesince }} ago</dd>
+        </div>
+        {% endif %}
+        <div class="flex justify-between">
+          <dt class="text-gray-400">Word count</dt>
+          <dd class="text-gray-700">~{{ article.content|wordcount }} words</dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Review action form -->
+    {% if article.status == 'in_review' or article.status == 'submitted' %}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">Review Decision</h3>
+
+      <form method="post" action="{% url 'core:review_action' article.slug %}" id="review-form">
+        {% csrf_token %}
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">
+            Reviewer Notes
+            <span class="text-gray-400 font-normal">(required to reject)</span>
+          </label>
+          <textarea name="note" rows="4" id="review-note"
+                    placeholder="Provide feedback for the writer, or explain your decision…"
+                    class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand resize-y"></textarea>
+        </div>
+
+        <div class="space-y-2">
+          <!-- Approve -->
+          <button type="button" onclick="submitReview('approve')"
+                  class="w-full flex items-center justify-center gap-2 bg-green-600 text-white font-medium text-sm py-2.5 rounded-lg hover:bg-green-700 transition">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Approve &amp; Publish
+          </button>
+
+          <!-- Reject -->
+          <button type="button" onclick="submitReview('reject')"
+                  class="w-full flex items-center justify-center gap-2 border border-red-300 text-red-600 font-medium text-sm py-2.5 rounded-lg hover:bg-red-50 transition">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Reject with Feedback
+          </button>
+
+          <!-- Comment only -->
+          <button type="button" onclick="submitReview('comment')"
+                  class="w-full flex items-center justify-center gap-2 border border-gray-200 text-gray-600 font-medium text-sm py-2 rounded-lg hover:bg-gray-50 transition">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+            </svg>
+            Add Comment
+          </button>
+        </div>
+
+        <input type="hidden" name="action" id="review-action" value="">
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- Review history timeline -->
+    {% if notes %}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">Review History</h3>
+      <div class="space-y-4">
+        {% for note in notes %}
+        <div class="flex gap-3">
+          <div class="flex flex-col items-center">
+            <div class="h-7 w-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0
+              {% if note.action == 'approved' %}bg-green-500
+              {% elif note.action == 'rejected' %}bg-red-500
+              {% elif note.action == 'submitted' %}bg-amber-500
+              {% elif note.action == 'in_review' %}bg-blue-500
+              {% else %}bg-gray-400{% endif %}">
+              {{ note.actor.email|first|upper|default:"?" }}
+            </div>
+            {% if not forloop.last %}
+            <div class="w-px flex-1 bg-gray-100 mt-1"></div>
+            {% endif %}
+          </div>
+          <div class="pb-4 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-semibold
+                {% if note.action == 'approved' %}text-green-600
+                {% elif note.action == 'rejected' %}text-red-600
+                {% elif note.action == 'submitted' %}text-amber-600
+                {% elif note.action == 'in_review' %}text-blue-600
+                {% else %}text-gray-600{% endif %}">
+                {{ note.get_action_display }}
+              </span>
+              <span class="text-xs text-gray-400">{{ note.created_at|timesince }} ago</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-0.5">{{ note.actor.email|default:"System" }}</p>
+            {% if note.note %}
+            <p class="text-sm text-gray-700 mt-1.5 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+              {{ note.note }}
+            </p>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+  function submitReview(action) {
+    const noteVal = document.getElementById('review-note').value.trim();
+    if (action === 'reject' && !noteVal) {
+      alert('Please provide a reason when rejecting an article.');
+      document.getElementById('review-note').focus();
+      return;
+    }
+    if (action === 'approve' && !confirm('Approve and publish this article?')) return;
+    document.getElementById('review-action').value = action;
+    document.getElementById('review-form').submit();
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "core/cms_base.html" %}
+{% block title %}Review Queue{% endblock %}
+{% block page_title %}Review Queue{% endblock %}
+{% block page_subtitle %}Articles awaiting your editorial review{% endblock %}
+
+{% block content %}
+
+<!-- Stats -->
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+    <p class="text-3xl font-bold text-amber-600">{{ pending_count }}</p>
+    <p class="text-sm text-gray-500 mt-1">Pending Review</p>
+  </div>
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+    <p class="text-3xl font-bold text-blue-600">{{ in_review_count }}</p>
+    <p class="text-sm text-gray-500 mt-1">Currently In Review</p>
+  </div>
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 sm:col-span-1 col-span-2">
+    <p class="text-3xl font-bold text-gray-700">{{ pending_count|add:in_review_count }}</p>
+    <p class="text-sm text-gray-500 mt-1">Total in Queue</p>
+  </div>
+</div>
+
+<!-- Filter tabs -->
+<div class="flex gap-2 mb-5">
+  <a href="?status=" class="px-4 py-2 rounded-full text-sm font-medium border transition
+     {% if not status_filter %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+    All
+  </a>
+  <a href="?status=submitted" class="px-4 py-2 rounded-full text-sm font-medium border transition
+     {% if status_filter == 'submitted' %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+    Pending
+  </a>
+  <a href="?status=in_review" class="px-4 py-2 rounded-full text-sm font-medium border transition
+     {% if status_filter == 'in_review' %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+    In Review
+  </a>
+</div>
+
+{% if articles %}
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="bg-gray-50 border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wide">
+        <th class="px-5 py-3 text-left font-semibold">Article</th>
+        <th class="px-5 py-3 text-left font-semibold hidden md:table-cell">Author</th>
+        <th class="px-5 py-3 text-left font-semibold hidden md:table-cell">Category</th>
+        <th class="px-5 py-3 text-left font-semibold">Status</th>
+        <th class="px-5 py-3 text-left font-semibold hidden lg:table-cell">Submitted</th>
+        <th class="px-5 py-3 text-right font-semibold">Action</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for article in articles %}
+      <tr class="hover:bg-gray-50 transition">
+
+        <td class="px-5 py-4 max-w-xs">
+          <p class="font-semibold text-gray-900 line-clamp-1">{{ article.title }}</p>
+          <p class="text-gray-400 text-xs mt-0.5 line-clamp-1">{{ article.summary }}</p>
+          <p class="text-gray-400 text-xs mt-1">{{ article.reading_time }} min read</p>
+        </td>
+
+        <td class="px-5 py-4 hidden md:table-cell">
+          <div class="flex items-center gap-2">
+            <div class="h-7 w-7 rounded-full bg-brand text-white text-xs font-bold flex items-center justify-center uppercase shrink-0">
+              {{ article.author.email|first|default:"?" }}
+            </div>
+            <span class="text-sm text-gray-700">{{ article.author.get_full_name|default:article.author.email|default:"Unknown" }}</span>
+          </div>
+        </td>
+
+        <td class="px-5 py-4 hidden md:table-cell">
+          {% if article.category %}
+          <span class="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">{{ article.category.name }}</span>
+          {% else %}<span class="text-gray-300 text-xs">—</span>{% endif %}
+        </td>
+
+        <td class="px-5 py-4">
+          {% if article.status == 'submitted' %}
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span> Pending
+          </span>
+          {% else %}
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+            <span class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span> In Review
+          </span>
+          {% if article.reviewed_by %}
+          <p class="text-xs text-gray-400 mt-1">by {{ article.reviewed_by.email }}</p>
+          {% endif %}
+          {% endif %}
+        </td>
+
+        <td class="px-5 py-4 hidden lg:table-cell text-xs text-gray-500">
+          {% if article.submitted_at %}{{ article.submitted_at|timesince }} ago{% else %}—{% endif %}
+        </td>
+
+        <td class="px-5 py-4 text-right">
+          <a href="{% url 'core:review_article' article.slug %}"
+             class="inline-flex items-center gap-1.5 bg-brand text-white text-xs font-medium px-4 py-2 rounded-lg hover:bg-brand-light transition">
+            {% if article.status == 'submitted' %}
+              Start Review
+            {% else %}
+              Continue Review
+            {% endif %}
+          </a>
+        </td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<div class="bg-white rounded-xl border border-dashed border-gray-200 py-20 text-center">
+  <svg class="h-12 w-12 text-gray-200 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+  </svg>
+  <p class="text-gray-500 font-medium">Queue is clear!</p>
+  <p class="text-gray-400 text-sm mt-1">No articles are waiting for review.</p>
+</div>
+{% endif %}
+
+{% endblock %}
