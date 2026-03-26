@@ -16,12 +16,12 @@ from .services import UserService
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect("users:user_list")
+        return redirect("core:editorial_dashboard")
 
     form = AuthenticationForm(request, data=request.POST or None)
     if request.method == "POST" and form.is_valid():
         login(request, form.get_user())
-        return redirect(request.GET.get("next", "users:user_list"))
+        return redirect(request.GET.get("next", "core:editorial_dashboard"))
 
     return render(request, "users/login.html", {"form": form})
 

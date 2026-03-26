@@ -132,7 +132,7 @@ AUTH_USER_MODEL = 'users.User'
 
 # Auth redirects
 LOGIN_URL = '/users/login/'
-LOGIN_REDIRECT_URL = '/users/'
+LOGIN_REDIRECT_URL = '/editorial/'
 LOGOUT_REDIRECT_URL = '/users/login/'
 
 # Email configuration.
