@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-z5srv0r1@2u)5jixm7&st!idr(5xja*jz!3adr&9@v593^+bx^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ethiopicdailymain.onrender.com']
+ALLOWED_HOSTS = ['ethiopicdailydevelop.onrender.com']
 
 
 # Application definition
