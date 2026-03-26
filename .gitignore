@@ -26,6 +26,10 @@ staticfiles/
 .env.*
 !.env.example
 
+# Backup files
+*.bak
+*.bak*
+
 # OS
 .DS_Store
 Thumbs.db
