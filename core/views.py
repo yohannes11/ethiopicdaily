@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .models import Article, Category, Reaction, ReviewNote
+from users.models import User
 
 # ─────────────────────────────────────────────
 # Permission decorators
@@ -154,11 +155,20 @@ def editorial_dashboard(request):
     for s in Article.Status:
         counts[s.value] = base.filter(status=s).count()
 
+    seven_days_ago = timezone.now() - timezone.timedelta(days=7)
+    extra = {}
+    if request.user.is_admin():
+        extra["total_users"] = User.objects.count()
+        extra["recent_published"] = Article.objects.filter(
+            status=Article.Status.PUBLISHED, updated_at__gte=seven_days_ago
+        ).count()
+
     return render(request, "core/editorial_dashboard.html", {
         "articles": qs,
         "status_choices": Article.Status.choices,
         "current_status": status_filter,
         "counts": counts,
+        **extra,
     })
 
 
