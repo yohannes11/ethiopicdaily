@@ -1,0 +1,111 @@
+{% extends "users/base.html" %}
+{% block title %}{{ profile_user.email }} — Ethiopian Daily{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto">
+  <div class="mb-6">
+    <a href="{% url 'users:user_list' %}" class="text-sm text-gray-400 hover:text-brand flex items-center gap-1">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Back to users
+    </a>
+  </div>
+
+  <!-- Profile card -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-5">
+    <div class="flex items-center gap-4 mb-6">
+      <div class="h-14 w-14 rounded-full bg-brand-light text-brand font-bold text-xl flex items-center justify-center uppercase">
+        {{ profile_user.email|first }}
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-gray-900">{{ profile_user.get_full_name|default:profile_user.username }}</h1>
+        <p class="text-gray-400 text-sm">{{ profile_user.email }}</p>
+      </div>
+      <div class="ml-auto">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+          {% if profile_user.role == 'admin' %}bg-purple-100 text-purple-700
+          {% elif profile_user.role == 'reviewer' %}bg-amber-100 text-amber-700
+          {% else %}bg-blue-100 text-blue-700{% endif %}">
+          {{ profile_user.get_role_display }}
+        </span>
+      </div>
+    </div>
+
+    <dl class="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <dt class="text-gray-400 text-xs uppercase tracking-wide mb-0.5">Status</dt>
+        <dd>
+          {% if profile_user.must_change_password %}
+            <span class="text-orange-600 font-medium">Pending password setup</span>
+          {% else %}
+            <span class="text-green-600 font-medium">Active</span>
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-400 text-xs uppercase tracking-wide mb-0.5">Joined</dt>
+        <dd class="text-gray-700">{{ profile_user.date_joined|date:"N j, Y" }}</dd>
+      </div>
+      <div>
+        <dt class="text-gray-400 text-xs uppercase tracking-wide mb-0.5">Last login</dt>
+        <dd class="text-gray-700">{{ profile_user.last_login|date:"N j, Y g:i a"|default:"Never" }}</dd>
+      </div>
+      <div>
+        <dt class="text-gray-400 text-xs uppercase tracking-wide mb-0.5">Username</dt>
+        <dd class="text-gray-700">{{ profile_user.username }}</dd>
+      </div>
+    </dl>
+  </div>
+
+  <!-- Edit role -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-5">
+    <h2 class="text-sm font-semibold text-gray-700 mb-4">Change Role</h2>
+    <form method="post" action="{% url 'users:update_role' profile_user.pk %}" class="flex items-center gap-3">
+      {% csrf_token %}
+      <select name="role"
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
+        {% for value, label in role_choices %}
+          <option value="{{ value }}" {% if profile_user.role == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit"
+              class="px-4 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-dark transition">
+        Update
+      </button>
+    </form>
+  </div>
+
+  <!-- Resend email / danger -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-sm font-semibold text-gray-700 mb-1">Actions</h2>
+
+    {% if profile_user.must_change_password %}
+    <form method="post" action="{% url 'users:resend_email' profile_user.pk %}">
+      {% csrf_token %}
+      <button type="submit"
+              class="w-full flex items-center justify-center gap-2 border border-brand text-brand text-sm font-medium px-4 py-2 rounded-lg hover:bg-brand-light transition">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        Resend Setup Email
+      </button>
+    </form>
+    {% endif %}
+
+    <form method="post" action="{% url 'users:delete_user' profile_user.pk %}"
+          onsubmit="return confirm('Delete {{ profile_user.email }}? This cannot be undone.')">
+      {% csrf_token %}
+      <button type="submit"
+              class="w-full flex items-center justify-center gap-2 border border-red-300 text-red-500 text-sm font-medium px-4 py-2 rounded-lg hover:bg-red-50 transition">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+        Delete User
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

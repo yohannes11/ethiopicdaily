@@ -1,0 +1,102 @@
+{% extends "users/base.html" %}
+{% block title %}Users — Ethiopian Daily{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">User Management</h1>
+    <p class="text-sm text-gray-500 mt-1">{{ users.count }} user{{ users.count|pluralize }} registered</p>
+  </div>
+</div>
+
+<!-- Role filter tabs -->
+<div class="flex gap-2 mb-5">
+  <a href="?role="
+     class="px-3 py-1.5 rounded-full text-sm font-medium transition
+       {% if not current_role %}bg-brand text-white{% else %}bg-white text-gray-600 border border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+    All
+  </a>
+  {% for value, label in roles %}
+  <a href="?role={{ value }}"
+     class="px-3 py-1.5 rounded-full text-sm font-medium transition
+       {% if current_role == value %}bg-brand text-white{% else %}bg-white text-gray-600 border border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+    {{ label }}
+  </a>
+  {% endfor %}
+</div>
+
+{% if users %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs tracking-wide">
+        <th class="px-5 py-3 text-left font-semibold">User</th>
+        <th class="px-5 py-3 text-left font-semibold">Role</th>
+        <th class="px-5 py-3 text-left font-semibold">Status</th>
+        <th class="px-5 py-3 text-left font-semibold">Joined</th>
+        <th class="px-5 py-3 text-right font-semibold">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for user in users %}
+      <tr class="hover:bg-gray-50 transition">
+        <td class="px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="h-9 w-9 rounded-full bg-brand-light text-brand font-bold text-sm flex items-center justify-center uppercase">
+              {{ user.email|first }}
+            </div>
+            <div>
+              <p class="font-medium text-gray-900">{{ user.get_full_name|default:user.username }}</p>
+              <p class="text-gray-400 text-xs">{{ user.email }}</p>
+            </div>
+          </div>
+        </td>
+        <td class="px-5 py-4">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+            {% if user.role == 'admin' %}bg-purple-100 text-purple-700
+            {% elif user.role == 'reviewer' %}bg-amber-100 text-amber-700
+            {% else %}bg-blue-100 text-blue-700{% endif %}">
+            {{ user.get_role_display }}
+          </span>
+        </td>
+        <td class="px-5 py-4">
+          {% if user.must_change_password %}
+            <span class="inline-flex items-center gap-1 text-xs text-orange-600 font-medium">
+              <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              Pending setup
+            </span>
+          {% else %}
+            <span class="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
+              <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              Active
+            </span>
+          {% endif %}
+        </td>
+        <td class="px-5 py-4 text-gray-500">{{ user.date_joined|date:"M d, Y" }}</td>
+        <td class="px-5 py-4 text-right">
+          <a href="{% url 'users:user_detail' user.pk %}"
+             class="text-brand text-xs font-medium hover:underline">View</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<div class="text-center py-20 bg-white rounded-xl border border-dashed border-gray-200">
+  <svg class="mx-auto h-10 w-10 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+      d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z" />
+  </svg>
+  <p class="text-gray-500 text-sm">No users found.</p>
+  <a href="{% url 'users:create_user' %}" class="mt-3 inline-block text-brand text-sm font-medium hover:underline">
+    Create the first user →
+  </a>
+</div>
+{% endif %}
+{% endblock %}

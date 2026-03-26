@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-z5srv0r1@2u)5jixm7&st!idr(5xja*jz!3adr&9@v593^+bx^'
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-z5srv0r1@2u)5jixm7&st!idr(5xja*jz!3adr&9@v593^+bx^',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ethiopicdailydevelop.onrender.com']
+ALLOWED_HOSTS = ['ethiopicdailydevelop.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -37,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -120,3 +125,35 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Custom user model
+AUTH_USER_MODEL = 'users.User'
+
+# Auth redirects
+LOGIN_URL = '/users/login/'
+LOGIN_REDIRECT_URL = '/users/'
+LOGOUT_REDIRECT_URL = '/users/login/'
+
+# Email configuration.
+# Set EMAIL_HOST_USER + EMAIL_HOST_PASSWORD env vars to enable real SMTP sending.
+# Without them, emails are printed to the console (safe for local dev).
+_email_user = os.environ.get('EMAIL_HOST_USER', '')
+_email_password = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+if _email_user and _email_password:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+    EMAIL_HOST_USER = _email_user
+    EMAIL_HOST_PASSWORD = _email_password
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@ethiopiandaily.com')
+
+# Base URL included in password-setup emails.
+PASSWORD_SETUP_URL_BASE = os.environ.get(
+    'PASSWORD_SETUP_URL_BASE',
+    'http://localhost:8000/users/setup-password',
+)
