@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ethiopic Daily — Coming Soon</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0a;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    /* Animated gradient orbs */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.25;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 600px; height: 600px; background: #e63946; top: -200px; left: -150px; animation-delay: 0s; }
+    .orb-2 { width: 500px; height: 500px; background: #f4a261; bottom: -200px; right: -100px; animation-delay: 3s; }
+    .orb-3 { width: 400px; height: 400px; background: #2a9d8f; top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: 6s; }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(30px, 40px) scale(1.08); }
+    }
+
+    /* Card */
+    .card {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 3.5rem 3rem;
+      max-width: 560px;
+      width: 90%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5);
+      animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(230, 57, 70, 0.15);
+      border: 1px solid rgba(230, 57, 70, 0.35);
+      color: #e63946;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 1.75rem;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      background: #e63946;
+      border-radius: 50%;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* Flag stripe accent */
+    .flag-stripe {
+      display: flex;
+      height: 4px;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    .flag-stripe span { flex: 1; }
+    .stripe-green  { background: #078930; }
+    .stripe-yellow { background: #FCDD09; }
+    .stripe-red    { background: #DA121A; }
+
+    h1 {
+      font-size: clamp(1.9rem, 5vw, 2.6rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,0.55));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    p {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Email form */
+    .form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .form input[type="email"] {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.8rem 1.2rem;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form input[type="email"]::placeholder { color: rgba(255,255,255,0.3); }
+    .form input[type="email"]:focus { border-color: rgba(230, 57, 70, 0.6); }
+
+    .form button {
+      padding: 0.8rem 1.6rem;
+      background: #e63946;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .form button:hover  { background: #c62b38; }
+    .form button:active { transform: scale(0.97); }
+
+    .footer-note {
+      margin-top: 2rem;
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="card">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      Under Construction
+    </div>
+
+    <div class="flag-stripe">
+      <span class="stripe-green"></span>
+      <span class="stripe-yellow"></span>
+      <span class="stripe-red"></span>
+    </div>
+
+    <h1>Ethiopic Daily<br>is coming soon</h1>
+    <p>We're working on something great. Enter your email and we'll let you know the moment we launch.</p>
+
+    <form class="form" onsubmit="handleSubmit(event)">
+      <input type="email" placeholder="your@email.com" required />
+      <button type="submit">Notify Me</button>
+    </form>
+
+    <p class="footer-note">No spam, ever. Unsubscribe anytime.</p>
+  </div>
+
+  <script>
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      btn.textContent = 'You\'re on the list!';
+      btn.style.background = '#2a9d8f';
+      btn.disabled = true;
+    }
+  </script>
+
+</body>
+</html>
