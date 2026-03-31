@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .models import Article, Category, Reaction, ReviewNote
+from .models import Article, Category, Reaction, ReviewNote, TelegramChannel, TelegramImport
 from users.models import User
 
 # ─────────────────────────────────────────────
@@ -49,6 +49,18 @@ def cms_required(view_func):
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return _redirect_to_login(request)
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def admin_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return _redirect_to_login(request)
+        if not request.user.is_admin():
+            messages.error(request, "Only admins can access this page.")
+            return redirect("core:homepage")
         return view_func(request, *args, **kwargs)
     return wrapper
 
@@ -161,6 +173,9 @@ def editorial_dashboard(request):
         extra["total_users"] = User.objects.count()
         extra["recent_published"] = Article.objects.filter(
             status=Article.Status.PUBLISHED, updated_at__gte=seven_days_ago
+        ).count()
+        extra["telegram_pending"] = TelegramImport.objects.filter(
+            status=TelegramImport.Status.PENDING
         ).count()
 
     return render(request, "core/editorial_dashboard.html", {
@@ -486,3 +501,204 @@ def review_action(request, slug):
 
     messages.error(request, "Unknown action.")
     return redirect("core:review_article", slug=slug)
+
+
+# ─────────────────────────────────────────────
+# Telegram import views  (admins only)
+# ─────────────────────────────────────────────
+
+@admin_required
+@require_POST
+def fetch_telegram(request):
+    from .services import fetch_telegram_messages, fetch_all_channels, get_active_channels
+
+    channel = request.POST.get("channel", "").strip()
+    active  = get_active_channels()
+
+    if channel:
+        if channel not in active:
+            messages.error(request, f"Unknown channel '{channel}'.")
+            return redirect("core:telegram_imports")
+        try:
+            batch = fetch_telegram_messages(channel, count=5)
+        except Exception as exc:
+            messages.error(request, f"Could not reach @{channel}: {exc}")
+            return redirect("core:telegram_imports")
+        all_fetched = batch
+        # Update last_fetched_at
+        TelegramChannel.objects.filter(slug=channel).update(last_fetched_at=timezone.now())
+    else:
+        results = fetch_all_channels(count_per_channel=5)
+        all_fetched = []
+        for ch, outcome in results.items():
+            if isinstance(outcome, Exception):
+                messages.warning(request, f"@{ch}: {outcome}")
+            else:
+                all_fetched.extend(outcome)
+                TelegramChannel.objects.filter(slug=ch).update(last_fetched_at=timezone.now())
+
+    created = 0
+    for item in all_fetched:
+        _, was_created = TelegramImport.objects.get_or_create(
+            message_id=item["message_id"],
+            defaults={
+                "channel":    item.get("channel", ""),
+                "source_url": item["source_url"],
+                "raw_text":   item["raw_text"],
+                "date":       item["date"],
+                "image_urls": item.get("image_urls", []),
+            },
+        )
+        if was_created:
+            created += 1
+
+    if created:
+        messages.success(request, f"Fetched {created} new message{'s' if created != 1 else ''}.")
+    else:
+        messages.info(request, "No new messages — everything is already imported.")
+    return redirect("core:telegram_imports")
+
+
+@admin_required
+def telegram_import_list(request):
+    status_filter  = request.GET.get("status", "pending")
+    channel_filter = request.GET.get("channel", "")
+    if status_filter not in TelegramImport.Status.values:
+        status_filter = "pending"
+
+    active_channels = TelegramChannel.objects.filter(is_active=True)
+    active_slugs    = [ch.slug for ch in active_channels]
+
+    qs = TelegramImport.objects.filter(status=status_filter)
+    if channel_filter and channel_filter in active_slugs:
+        qs = qs.filter(channel=channel_filter)
+
+    counts = {s.value: TelegramImport.objects.filter(status=s).count() for s in TelegramImport.Status}
+
+    return render(request, "core/telegram_imports.html", {
+        "imports":        qs,
+        "counts":         counts,
+        "status_filter":  status_filter,
+        "channel_filter": channel_filter,
+        "statuses":       TelegramImport.Status,
+        "channels":       active_channels,
+    })
+
+
+@admin_required
+def approve_import(request, pk):
+    item = get_object_or_404(TelegramImport, pk=pk, status=TelegramImport.Status.PENDING)
+    categories = Category.objects.all()
+
+    if request.method == "POST":
+        title      = request.POST.get("title", "").strip()
+        summary    = request.POST.get("summary", "").strip()
+        content     = request.POST.get("content", "").strip()
+        category_id = request.POST.get("category") or None
+        image_url   = request.POST.get("image_url", "").strip()
+
+        if not title:
+            messages.error(request, "Title is required.")
+        elif not content:
+            messages.error(request, "Content is required.")
+        elif not summary:
+            messages.error(request, "Summary is required.")
+        else:
+            article = Article.objects.create(
+                title=title,
+                summary=summary,
+                content=content,
+                image_url=image_url,
+                category_id=category_id,
+                author=request.user,
+                status=Article.Status.PUBLISHED,
+                published_at=timezone.now(),
+            )
+            item.article = article
+            item.status  = TelegramImport.Status.APPROVED
+            item.save()
+            messages.success(request, f"Article \"{title}\" published.")
+            return redirect("core:telegram_imports")
+
+    return render(request, "core/approve_import.html", {
+        "item":       item,
+        "categories": categories,
+    })
+
+
+@admin_required
+@require_POST
+def reject_import(request, pk):
+    item = get_object_or_404(TelegramImport, pk=pk, status=TelegramImport.Status.PENDING)
+    item.status = TelegramImport.Status.REJECTED
+    item.save()
+    messages.success(request, "Import rejected.")
+    return redirect("core:telegram_imports")
+
+
+# ─────────────────────────────────────────────
+# Channel management views  (admins only)
+# ─────────────────────────────────────────────
+
+@admin_required
+def channel_list(request):
+    channels = TelegramChannel.objects.all()
+    return render(request, "core/channel_list.html", {"channels": channels})
+
+
+@admin_required
+def channel_create(request):
+    if request.method == "POST":
+        slug         = request.POST.get("slug", "").strip().lower()
+        display_name = request.POST.get("display_name", "").strip()
+        interval     = request.POST.get("fetch_interval", "5").strip()
+
+        errors = {}
+        if not slug:
+            errors["slug"] = "Username is required."
+        elif TelegramChannel.objects.filter(slug=slug).exists():
+            errors["slug"] = "A channel with this username already exists."
+        if not display_name:
+            errors["display_name"] = "Display name is required."
+        try:
+            interval = max(1, int(interval))
+        except ValueError:
+            interval = 5
+
+        if not errors:
+            TelegramChannel.objects.create(
+                slug=slug,
+                display_name=display_name,
+                fetch_interval=interval,
+                is_active=True,
+            )
+            messages.success(request, f"Channel @{slug} added.")
+            return redirect("core:channel_list")
+
+        return render(request, "core/channel_form.html", {
+            "errors": errors,
+            "form_data": request.POST,
+        })
+
+    return render(request, "core/channel_form.html", {"errors": {}, "form_data": {}})
+
+
+@admin_required
+@require_POST
+def channel_toggle(request, pk):
+    channel = get_object_or_404(TelegramChannel, pk=pk)
+    channel.is_active = not channel.is_active
+    channel.save(update_fields=["is_active"])
+    state = "activated" if channel.is_active else "deactivated"
+    messages.success(request, f"@{channel.slug} {state}.")
+    return redirect("core:channel_list")
+
+
+@admin_required
+@require_POST
+def channel_delete(request, pk):
+    channel = get_object_or_404(TelegramChannel, pk=pk)
+    slug = channel.slug
+    channel.delete()
+    messages.success(request, f"Channel @{slug} deleted.")
+    return redirect("core:channel_list")

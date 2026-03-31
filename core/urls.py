@@ -23,4 +23,16 @@ urlpatterns = [
     path("review/", views.review_queue, name="review_queue"),
     path("review/<slug:slug>/", views.review_article, name="review_article"),
     path("review/<slug:slug>/action/", views.review_action, name="review_action"),
+
+    # Telegram import — admins only
+    path("telegram/", views.telegram_import_list, name="telegram_imports"),
+    path("telegram/fetch/", views.fetch_telegram, name="fetch_telegram"),
+    path("telegram/<int:pk>/approve/", views.approve_import, name="approve_import"),
+    path("telegram/<int:pk>/reject/", views.reject_import, name="reject_import"),
+
+    # Channel management — admins only
+    path("channels/", views.channel_list, name="channel_list"),
+    path("channels/add/", views.channel_create, name="channel_create"),
+    path("channels/<int:pk>/toggle/", views.channel_toggle, name="channel_toggle"),
+    path("channels/<int:pk>/delete/", views.channel_delete, name="channel_delete"),
 ]

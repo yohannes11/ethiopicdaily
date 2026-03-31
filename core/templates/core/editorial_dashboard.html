@@ -299,7 +299,7 @@
   <div class="flex-1 h-px bg-gray-100"></div>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
 
   <!-- Write Article — Ethiopian gold -->
   <a href="{% url 'core:article_create' %}"
@@ -354,6 +354,40 @@
       <p class="text-xs mt-0.5 opacity-70 text-white">
         {% if counts.submitted %}<span style="color:#f0c96a;" class="font-semibold">{{ counts.submitted }} waiting</span> for review
         {% else %}Queue is clear{% endif %}
+      </p>
+    </div>
+    <svg class="h-4 w-4 text-white/40 ml-auto group-hover:translate-x-1 transition-transform relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+    </svg>
+  </a>
+
+  <!-- Telegram Import — channel blue -->
+  <a href="{% url 'core:telegram_imports' %}"
+     class="group relative overflow-hidden flex items-center gap-4 rounded-xl p-5 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+     style="background: linear-gradient(135deg, #0a4b6e 0%, #1a7fc4 100%); border: 1px solid #229ED9;">
+    <div class="absolute -right-4 -bottom-4 pointer-events-none" style="opacity:0.15;">
+      <svg width="80" height="80" viewBox="0 0 140 140" fill="none">
+        <path d="M52 0 H88 V52 H140 V88 H88 V140 H52 V88 H0 V52 H52 Z" fill="white"/>
+        <line x1="64" y1="52" x2="64" y2="88" stroke="white" stroke-width="2"/>
+        <line x1="76" y1="52" x2="76" y2="88" stroke="white" stroke-width="2"/>
+        <line x1="52" y1="64" x2="88" y2="64" stroke="white" stroke-width="2"/>
+        <line x1="52" y1="76" x2="88" y2="76" stroke="white" stroke-width="2"/>
+      </svg>
+    </div>
+    <div class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0"
+         style="background: rgba(255,255,255,0.15);">
+      <svg class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/>
+      </svg>
+    </div>
+    <div class="relative z-10">
+      <p class="text-sm font-bold text-white">Telegram Import</p>
+      <p class="text-xs mt-0.5 opacity-70 text-white">
+        {% if telegram_pending %}
+          <span style="color:#f0c96a;" class="font-semibold">{{ telegram_pending }} pending</span> review
+        {% else %}
+          Tikvah Ethiopia channel
+        {% endif %}
       </p>
     </div>
     <svg class="h-4 w-4 text-white/40 ml-auto group-hover:translate-x-1 transition-transform relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">

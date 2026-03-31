@@ -1,0 +1,293 @@
+{% extends "core/cms_base.html" %}
+{% block title %}Review Import{% endblock %}
+{% block page_title %}Review & Publish{% endblock %}
+{% block page_subtitle %}Edit the imported message before publishing it as an article{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'core:telegram_imports' %}"
+   class="flex items-center gap-2 text-gray-600 text-sm font-medium px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition">
+  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+  </svg>
+  Back to Imports
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+  <!-- ── LEFT: Edit form ── -->
+  <div class="lg:col-span-3">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+      <!-- Tilet stripe -->
+      <div class="flex h-[3px]">
+        <div class="flex-1" style="background:#1e3a8a;"></div>
+        <div class="flex-1" style="background:#C9902A;"></div>
+        <div class="flex-1" style="background:#9b1c1c;"></div>
+        <div class="flex-1" style="background:#f0c96a;"></div>
+        <div class="flex-1" style="background:#166534;"></div>
+        <div class="flex-1" style="background:#f0c96a;"></div>
+        <div class="flex-1" style="background:#9b1c1c;"></div>
+        <div class="flex-1" style="background:#C9902A;"></div>
+        <div class="flex-1" style="background:#1e3a8a;"></div>
+      </div>
+
+      <form method="post" class="p-6 space-y-5">
+        {% csrf_token %}
+
+        <!-- Title -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1.5">
+            Title <span class="text-rose-400">*</span>
+          </label>
+          <input type="text" name="title"
+                 value="{{ item.suggested_title }}"
+                 class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-900 focus:outline-none transition"
+                 onfocus="this.style.borderColor='#C9902A';this.style.boxShadow='0 0 0 3px rgba(201,144,42,0.15)';"
+                 onblur="this.style.borderColor='';this.style.boxShadow='';"
+                 required>
+        </div>
+
+        <!-- Summary -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1.5">
+            Summary <span class="text-rose-400">*</span>
+          </label>
+          <textarea name="summary" rows="3"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 resize-none focus:outline-none transition"
+                    onfocus="this.style.borderColor='#C9902A';this.style.boxShadow='0 0 0 3px rgba(201,144,42,0.15)';"
+                    onblur="this.style.borderColor='';this.style.boxShadow='';"
+                    required>{{ item.suggested_summary }}</textarea>
+          <p class="text-xs text-gray-400 mt-1">Shown on the homepage and in article previews.</p>
+        </div>
+
+        <!-- Content -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1.5">
+            Content <span class="text-rose-400">*</span>
+          </label>
+          <textarea name="content" rows="12"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 font-mono resize-y focus:outline-none transition"
+                    onfocus="this.style.borderColor='#C9902A';this.style.boxShadow='0 0 0 3px rgba(201,144,42,0.15)';"
+                    onblur="this.style.borderColor='';this.style.boxShadow='';"
+                    required>{{ item.raw_text }}</textarea>
+        </div>
+
+        <!-- ── IMAGE PICKER ── -->
+        {% if item.image_urls %}
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1.5">
+            Article Image
+          </label>
+          <p class="text-xs text-gray-400 mb-3">
+            Select one of the images attached to this post, or choose "No image".
+          </p>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="img-picker">
+
+            {% for url in item.image_urls %}
+            <label class="img-tile cursor-pointer" data-value="{{ url }}">
+              <div class="img-frame relative overflow-hidden rounded-xl border-2 border-gray-200 transition-all duration-150"
+                   style="aspect-ratio:16/9; background:#f1f5f9;">
+                <img src="{{ url }}"
+                     alt="Image {{ forloop.counter }}"
+                     class="w-full h-full object-cover block"
+                     loading="lazy"
+                     onerror="this.closest('.img-tile').style.display='none'">
+                <!-- Gold check overlay (hidden by default, shown via JS) -->
+                <div class="img-overlay absolute inset-0 hidden flex-col items-center justify-center"
+                     style="background:rgba(201,144,42,0.18);">
+                  <svg class="h-9 w-9" style="color:#C9902A; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3));"
+                       fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="block text-center text-xs text-gray-400 mt-1">Image {{ forloop.counter }}</span>
+            </label>
+            {% endfor %}
+
+            <!-- No image tile -->
+            <label class="img-tile cursor-pointer" data-value="">
+              <div class="img-frame relative overflow-hidden rounded-xl border-2 border-slate-300 flex items-center justify-center bg-gray-50 transition-all duration-150"
+                   style="aspect-ratio:16/9;">
+                <div class="text-center pointer-events-none">
+                  <svg class="h-7 w-7 text-gray-300 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636"/>
+                  </svg>
+                  <span class="text-xs text-gray-400">No image</span>
+                </div>
+                <div class="img-overlay absolute inset-0 hidden flex-col items-center justify-center"
+                     style="background:rgba(100,116,139,0.12);">
+                  <svg class="h-9 w-9 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+              </div>
+            </label>
+
+          </div>
+
+          <!-- Hidden input carries the chosen value -->
+          <input type="hidden" name="image_url" id="img-value" value="">
+
+          <script>
+            (function () {
+              var tiles   = document.querySelectorAll('#img-picker .img-tile');
+              var hidden  = document.getElementById('img-value');
+              var GOLD    = '#C9902A';
+              var SLATE   = '#64748b';
+
+              function select(tile) {
+                tiles.forEach(function (t) {
+                  var frame   = t.querySelector('.img-frame');
+                  var overlay = t.querySelector('.img-overlay');
+                  frame.style.borderColor = '';
+                  overlay.style.display   = 'none';
+                });
+                var val     = tile.getAttribute('data-value');
+                var frame   = tile.querySelector('.img-frame');
+                var overlay = tile.querySelector('.img-overlay');
+                frame.style.borderColor = val ? GOLD : SLATE;
+                overlay.style.display   = 'flex';
+                hidden.value = val;
+              }
+
+              // Default: select "No image" tile (last one)
+              select(tiles[tiles.length - 1]);
+
+              tiles.forEach(function (tile) {
+                tile.addEventListener('click', function () { select(tile); });
+              });
+            })();
+          </script>
+        </div>
+
+        {% else %}
+        <!-- No images found — manual URL fallback -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1.5">
+            Image URL <span class="text-gray-400 font-normal normal-case">(optional)</span>
+          </label>
+          <input type="url" name="image_url" placeholder="https://..."
+                 class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:outline-none transition"
+                 onfocus="this.style.borderColor='#C9902A';this.style.boxShadow='0 0 0 3px rgba(201,144,42,0.15)';"
+                 onblur="this.style.borderColor='';this.style.boxShadow='';">
+          <p class="text-xs text-gray-400 mt-1">No images were detected in this post.</p>
+        </div>
+        {% endif %}
+
+        <!-- Category -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1.5">
+            Category
+          </label>
+          <select name="category"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:outline-none transition bg-white"
+                  onfocus="this.style.borderColor='#C9902A';this.style.boxShadow='0 0 0 3px rgba(201,144,42,0.15)';"
+                  onblur="this.style.borderColor='';this.style.boxShadow='';">
+            <option value="">— No category —</option>
+            {% for cat in categories %}
+            <option value="{{ cat.pk }}">{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex items-center gap-3 pt-2">
+          <button type="submit"
+                  class="flex items-center gap-2 text-white text-sm font-bold px-6 py-2.5 rounded-xl transition shadow-md"
+                  style="background: linear-gradient(135deg, #C9902A, #a8721d);">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Publish Article
+          </button>
+          <form method="post" action="{% url 'core:reject_import' item.pk %}" class="inline">
+            {% csrf_token %}
+            <button type="submit"
+                    class="flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 hover:bg-rose-50 hover:text-rose-600 transition">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+              Reject
+            </button>
+          </form>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: Original message ── -->
+  <div class="lg:col-span-2">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-6">
+
+      <div class="flex items-center gap-2 px-5 py-3.5 border-b border-gray-100"
+           {% if item.channel == "tikvahethiopia" %}style="background:linear-gradient(90deg,#e8f5fc,#f0faff);"
+           {% else %}style="background:linear-gradient(90deg,#f3e8ff,#faf5ff);"{% endif %}>
+        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"
+             {% if item.channel == "tikvahethiopia" %}style="color:#229ED9;"{% else %}style="color:#7c3aed;"{% endif %}>
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/>
+        </svg>
+        <span class="text-xs font-bold uppercase tracking-widest"
+              {% if item.channel == "tikvahethiopia" %}style="color:#229ED9;"{% else %}style="color:#7c3aed;"{% endif %}>
+          {% if item.channel == "tikvahethiopia" %}Tikvah Ethiopia{% else %}Ayuze Habesh News{% endif %}
+          · Original Post
+        </span>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <!-- Author row -->
+        <div class="flex items-center gap-3">
+          <div class="h-9 w-9 rounded-full flex items-center justify-center shrink-0"
+               style="background: linear-gradient(135deg, #229ED9, #1a7fc4);">
+            <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-gray-800">Tikvah Ethiopia</p>
+            <p class="text-xs text-gray-400">{{ item.date|date:"N j, Y · H:i" }}</p>
+          </div>
+          {% if item.source_url %}
+          <a href="{{ item.source_url }}" target="_blank" rel="noopener"
+             class="ml-auto text-xs font-medium hover:underline" style="color:#229ED9;">
+            View original ↗
+          </a>
+          {% endif %}
+        </div>
+
+        <!-- Message text -->
+        <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 leading-relaxed whitespace-pre-line border border-gray-100 max-h-48 overflow-y-auto">
+          {{ item.raw_text }}
+        </div>
+
+        <!-- Image strip preview -->
+        {% if item.image_urls %}
+        <div>
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
+            Attached images ({{ item.image_urls|length }})
+          </p>
+          <div class="flex gap-2 overflow-x-auto pb-1">
+            {% for url in item.image_urls %}
+            <img src="{{ url }}" alt="img {{ forloop.counter }}"
+                 class="h-16 w-24 object-cover rounded-lg shrink-0 border border-gray-100"
+                 loading="lazy"
+                 onerror="this.style.display='none'">
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <p class="text-xs text-gray-400">
+          ID: <code class="bg-gray-100 px-1 py-0.5 rounded text-xs">{{ item.message_id }}</code>
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

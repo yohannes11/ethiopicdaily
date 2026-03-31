@@ -111,6 +111,37 @@
           </svg>
           User Management
         </a>
+        <!-- Telegram section -->
+        <p class="text-xs font-semibold text-blue-400 uppercase tracking-widest px-2 mb-2 mt-3">Telegram</p>
+        <a href="{% url 'core:telegram_imports' %}"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                  {% if 'telegram' in request.path and 'channels' not in request.path %}bg-blue-900 text-white{% else %}text-blue-200 hover:bg-blue-900 hover:text-white{% endif %} transition">
+          <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/>
+          </svg>
+          All Imports
+        </a>
+
+        <!-- Dynamic channel list -->
+        {% for ch in telegram_channels %}
+        <a href="{% url 'core:telegram_imports' %}?channel={{ ch.slug }}"
+           class="flex items-center gap-3 px-3 py-1.5 rounded-lg text-xs font-medium
+                  {% if channel_filter == ch.slug or request.GET.channel == ch.slug %}bg-blue-900 text-white{% else %}text-blue-300 hover:bg-blue-900 hover:text-white{% endif %} transition ml-2">
+          <span class="h-1.5 w-1.5 rounded-full bg-blue-400 shrink-0"></span>
+          {{ ch.display_name }}
+        </a>
+        {% endfor %}
+
+        <a href="{% url 'core:channel_list' %}"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                  {% if 'channels' in request.path %}bg-blue-900 text-white{% else %}text-blue-200 hover:bg-blue-900 hover:text-white{% endif %} transition mt-1">
+          <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Manage Channels
+        </a>
         {% endif %}
       </div>
     </nav>
