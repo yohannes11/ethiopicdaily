@@ -7,6 +7,7 @@ the public web preview endpoint (no API key required).
 
 import re
 import unicodedata
+from typing import Union
 
 import requests
 from bs4 import BeautifulSoup
@@ -177,7 +178,7 @@ def fetch_telegram_messages(channel: str, count: int = 5) -> list[dict]:
     return results
 
 
-def fetch_all_channels(count_per_channel: int = 5) -> dict[str, list[dict] | Exception]:
+def fetch_all_channels(count_per_channel: int = 5) -> dict[str, Union[list[dict], Exception]]:
     """
     Fetch messages from every active registered channel.
 

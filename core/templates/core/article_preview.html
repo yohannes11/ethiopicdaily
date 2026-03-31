@@ -13,7 +13,7 @@
       theme: {
         extend: {
           colors: {
-            brand: { DEFAULT: '#2563eb', light: '#60a5fa' },
+            brand: { DEFAULT: '#0f4c81', dark: '#0b3a63', light: '#e8f4ff', accent: '#d8a038' },
           },
           fontFamily: {
             sans:    ['"Plus Jakarta Sans"', '"Noto Sans Ethiopic"', 'system-ui', 'sans-serif'],
@@ -26,17 +26,21 @@
   </script>
   <style>.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}</style>
 </head>
-<body class="bg-gray-50 font-sans antialiased">
+<body class="bg-slate-100 font-sans antialiased text-slate-900">
+
+<div class="fixed inset-0 -z-10 pointer-events-none">
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_12%_4%,rgba(216,160,56,0.12),transparent_35%),radial-gradient(circle_at_88%_8%,rgba(15,76,129,0.18),transparent_42%),linear-gradient(#f1f5f9,#f8fafc)]"></div>
+</div>
 
 <!-- Preview banner -->
-<div class="bg-amber-500 text-white text-sm font-semibold text-center py-2.5 flex items-center justify-center gap-3 sticky top-0 z-50 shadow">
+<div class="bg-brand-accent text-white text-sm font-semibold text-center py-2.5 flex items-center justify-center gap-3 sticky top-0 z-50 shadow">
   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
   </svg>
   PREVIEW — This article is not yet published
   <a href="{% url 'core:article_edit' article.slug %}"
-     class="ml-4 bg-white text-amber-600 font-semibold text-xs px-3 py-1 rounded-full hover:bg-amber-50 transition">
+     class="ml-4 bg-white text-brand-dark font-semibold text-xs px-3 py-1 rounded-full hover:bg-slate-100 transition">
     ← Back to Editor
   </a>
 </div>
@@ -67,7 +71,7 @@
   <!-- Status badge -->
   <div class="mb-4 flex items-center gap-2">
     {% if article.category %}
-    <span class="inline-block bg-brand text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded">
+    <span class="inline-block bg-brand-accent text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow">
       {{ article.category.name }}
     </span>
     {% endif %}
@@ -82,7 +86,7 @@
   </h1>
 
   <!-- Summary / standfirst -->
-  <p class="text-xl text-gray-600 font-serif leading-relaxed border-l-4 border-brand pl-4 mb-6">
+  <p class="text-xl text-slate-600 font-serif leading-relaxed border-l-4 border-brand-accent pl-4 mb-6">
     {{ article.summary }}
   </p>
 
@@ -110,7 +114,7 @@
   {% endif %}
 
   <!-- Article body -->
-  <div class="prose prose-lg max-w-none font-serif text-gray-800 leading-relaxed space-y-5">
+  <div class="prose prose-lg max-w-none font-serif text-slate-800 leading-relaxed space-y-5 bg-white/90 border border-white rounded-2xl p-5 sm:p-8 shadow-sm">
     {{ article.content|linebreaksbr }}
   </div>
 

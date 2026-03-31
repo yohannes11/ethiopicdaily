@@ -195,6 +195,33 @@
           </select>
         </div>
 
+        <!-- Placement flags -->
+        <div class="flex flex-col gap-3 pt-1 pb-1">
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <div class="relative">
+              <input type="checkbox" name="is_featured" id="is_featured" class="sr-only peer">
+              <div class="w-10 h-6 rounded-full transition-colors duration-200 bg-gray-200 peer-checked:bg-amber-500"></div>
+              <div class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 peer-checked:translate-x-4"></div>
+            </div>
+            <div>
+              <span class="text-sm font-semibold text-gray-700 group-hover:text-amber-700 transition">Feature on Home Page</span>
+              <p class="text-xs text-gray-400">Shows as a main/featured story on the homepage.</p>
+            </div>
+          </label>
+
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <div class="relative">
+              <input type="checkbox" name="is_breaking" id="is_breaking" class="sr-only peer">
+              <div class="w-10 h-6 rounded-full transition-colors duration-200 bg-gray-200 peer-checked:bg-rose-500"></div>
+              <div class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 peer-checked:translate-x-4"></div>
+            </div>
+            <div>
+              <span class="text-sm font-semibold text-gray-700 group-hover:text-rose-700 transition">Mark as Breaking News</span>
+              <p class="text-xs text-gray-400">Displays a "Breaking" badge and appears in the breaking news ticker.</p>
+            </div>
+          </label>
+        </div>
+
         <!-- Submit -->
         <div class="flex items-center gap-3 pt-2">
           <button type="submit"
@@ -226,16 +253,12 @@
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-6">
 
       <div class="flex items-center gap-2 px-5 py-3.5 border-b border-gray-100"
-           {% if item.channel == "tikvahethiopia" %}style="background:linear-gradient(90deg,#e8f5fc,#f0faff);"
-           {% else %}style="background:linear-gradient(90deg,#f3e8ff,#faf5ff);"{% endif %}>
-        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"
-             {% if item.channel == "tikvahethiopia" %}style="color:#229ED9;"{% else %}style="color:#7c3aed;"{% endif %}>
+           style="background:linear-gradient(90deg,#e8f5fc,#f0faff);">
+        <svg class="h-4 w-4 shrink-0 text-[#229ED9]" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/>
         </svg>
-        <span class="text-xs font-bold uppercase tracking-widest"
-              {% if item.channel == "tikvahethiopia" %}style="color:#229ED9;"{% else %}style="color:#7c3aed;"{% endif %}>
-          {% if item.channel == "tikvahethiopia" %}Tikvah Ethiopia{% else %}Ayuze Habesh News{% endif %}
-          · Original Post
+        <span class="text-xs font-bold uppercase tracking-widest text-[#229ED9]">
+          {{ channel_obj.display_name|default:item.channel }} · Original Post
         </span>
       </div>
 
@@ -249,7 +272,7 @@
             </svg>
           </div>
           <div>
-            <p class="text-sm font-bold text-gray-800">Tikvah Ethiopia</p>
+            <p class="text-sm font-bold text-gray-800">{{ channel_obj.display_name|default:item.channel }}</p>
             <p class="text-xs text-gray-400">{{ item.date|date:"N j, Y · H:i" }}</p>
           </div>
           {% if item.source_url %}

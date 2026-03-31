@@ -596,6 +596,8 @@ def approve_import(request, pk):
         content     = request.POST.get("content", "").strip()
         category_id = request.POST.get("category") or None
         image_url   = request.POST.get("image_url", "").strip()
+        is_featured = request.POST.get("is_featured") == "on"
+        is_breaking = request.POST.get("is_breaking") == "on"
 
         if not title:
             messages.error(request, "Title is required.")
@@ -613,6 +615,8 @@ def approve_import(request, pk):
                 author=request.user,
                 status=Article.Status.PUBLISHED,
                 published_at=timezone.now(),
+                is_featured=is_featured,
+                is_breaking=is_breaking,
             )
             item.article = article
             item.status  = TelegramImport.Status.APPROVED
@@ -620,9 +624,12 @@ def approve_import(request, pk):
             messages.success(request, f"Article \"{title}\" published.")
             return redirect("core:telegram_imports")
 
+    channel_obj = TelegramChannel.objects.filter(slug=item.channel).first()
+
     return render(request, "core/approve_import.html", {
-        "item":       item,
-        "categories": categories,
+        "item":        item,
+        "categories":  categories,
+        "channel_obj": channel_obj,
     })
 
 

@@ -13,7 +13,7 @@
       theme: {
         extend: {
           colors: {
-            brand: { DEFAULT: '#2563eb', light: '#60a5fa' },
+            brand: { DEFAULT: '#0f4c81', dark: '#0b3a63', light: '#e8f4ff', accent: '#d8a038' },
           },
           fontFamily: {
             sans:    ['"Plus Jakarta Sans"', '"Noto Sans Ethiopic"', 'system-ui', 'sans-serif'],
@@ -50,7 +50,11 @@
     }
   </script>
 </head>
-<body class="bg-gray-50 font-sans antialiased">
+<body class="bg-slate-100 font-sans antialiased text-slate-900">
+
+<div class="fixed inset-0 -z-10 pointer-events-none">
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_15%_5%,rgba(216,160,56,0.12),transparent_35%),radial-gradient(circle_at_85%_2%,rgba(15,76,129,0.18),transparent_40%),linear-gradient(#f1f5f9,#f8fafc)]"></div>
+</div>
 
 <!-- Header (minimal) -->
 <header class="bg-brand text-white shadow-xl sticky top-0 z-50 relative overflow-hidden">
@@ -105,7 +109,7 @@
         </svg>
         <span id="ds-label">Data Saver</span>
       </button>
-      <a href="{% url 'core:homepage' %}" class="text-sm text-white/60 hover:text-white transition flex items-center gap-1">
+      <a href="{% url 'core:homepage' %}" class="text-sm text-white/70 hover:text-white transition flex items-center gap-1">
         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
@@ -121,7 +125,7 @@
   <!-- Category + Breadcrumb -->
   {% if article.category %}
   <div class="mb-4">
-    <span class="inline-block bg-brand text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded">
+    <span class="inline-block bg-brand-accent text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow">
       {{ article.category.name }}
     </span>
   </div>
@@ -133,7 +137,7 @@
   </h1>
 
   <!-- Summary / standfirst -->
-  <p class="text-xl text-gray-600 font-serif leading-relaxed border-l-4 border-brand pl-4 mb-6">
+  <p class="text-xl text-slate-600 font-serif leading-relaxed border-l-4 border-brand-accent pl-4 mb-6">
     {{ article.summary }}
   </p>
 
@@ -159,6 +163,17 @@
       </svg>
       {{ article.views_count }} views
     </span>
+    {% if article.telegram_import %}
+    <span>·</span>
+    <a href="{{ article.telegram_import.source_url }}" target="_blank" rel="noopener"
+       class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full no-underline transition hover:opacity-80"
+       style="background:#e8f5fc; color:#0a7fc4;">
+      <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/>
+      </svg>
+      Via @{{ article.telegram_import.channel }}
+    </a>
+    {% endif %}
   </div>
 
   <!-- Video player -->
@@ -190,7 +205,7 @@
   {% endif %}
 
   <!-- Article body -->
-  <div class="prose prose-lg max-w-none font-serif text-gray-800 leading-relaxed space-y-5">
+  <div class="prose prose-lg max-w-none font-serif text-slate-800 leading-relaxed space-y-5 bg-white/90 border border-white rounded-2xl p-5 sm:p-8 shadow-sm">
     {{ article.content|linebreaksbr }}
   </div>
 
@@ -199,23 +214,23 @@
     <p class="text-sm font-semibold text-gray-600 mb-3">How did this story make you feel?</p>
     <div class="flex flex-wrap gap-2" id="reaction-buttons">
       <button data-reaction="like" onclick="sendReaction('like')"
-        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'like' %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'like' %}bg-brand text-white border-brand{% else %}bg-white text-slate-600 border-slate-200 hover:border-brand hover:text-brand{% endif %}">
         <span class="text-lg leading-none">👍</span><span id="count-like">{{ reaction_counts.like }}</span>
       </button>
       <button data-reaction="love" onclick="sendReaction('love')"
-        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'love' %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'love' %}bg-brand text-white border-brand{% else %}bg-white text-slate-600 border-slate-200 hover:border-brand hover:text-brand{% endif %}">
         <span class="text-lg leading-none">❤️</span><span id="count-love">{{ reaction_counts.love }}</span>
       </button>
       <button data-reaction="wow" onclick="sendReaction('wow')"
-        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'wow' %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'wow' %}bg-brand text-white border-brand{% else %}bg-white text-slate-600 border-slate-200 hover:border-brand hover:text-brand{% endif %}">
         <span class="text-lg leading-none">😮</span><span id="count-wow">{{ reaction_counts.wow }}</span>
       </button>
       <button data-reaction="sad" onclick="sendReaction('sad')"
-        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'sad' %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'sad' %}bg-brand text-white border-brand{% else %}bg-white text-slate-600 border-slate-200 hover:border-brand hover:text-brand{% endif %}">
         <span class="text-lg leading-none">😢</span><span id="count-sad">{{ reaction_counts.sad }}</span>
       </button>
       <button data-reaction="angry" onclick="sendReaction('angry')"
-        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'angry' %}bg-brand text-white border-brand{% else %}bg-white text-gray-600 border-gray-200 hover:border-brand hover:text-brand{% endif %}">
+        class="reaction-btn flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition {% if user_reaction == 'angry' %}bg-brand text-white border-brand{% else %}bg-white text-slate-600 border-slate-200 hover:border-brand hover:text-brand{% endif %}">
         <span class="text-lg leading-none">😡</span><span id="count-angry">{{ reaction_counts.angry }}</span>
       </button>
     </div>
@@ -231,9 +246,32 @@
   <div class="mt-10 pt-6 border-t border-gray-200 flex items-center gap-2 flex-wrap">
     <span class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Topics:</span>
     <a href="{% url 'core:homepage' %}#section-{{ article.category.slug }}"
-       class="px-3 py-1 bg-gray-100 hover:bg-brand hover:text-white text-gray-700 text-xs font-medium rounded-full transition">
+      class="px-3 py-1 bg-slate-100 hover:bg-brand hover:text-white text-slate-700 text-xs font-medium rounded-full transition">
       {{ article.category.name }}
     </a>
+  </div>
+  {% endif %}
+
+  <!-- Telegram source attribution -->
+  {% if article.telegram_import %}
+  <div class="mt-8 pt-6 border-t border-gray-200">
+    <div class="flex items-start gap-3 bg-[#e8f5fc] rounded-xl px-4 py-3">
+      <svg class="h-5 w-5 shrink-0 mt-0.5" style="color:#229ED9;" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/>
+      </svg>
+      <div class="text-sm" style="color:#0a4b6e;">
+        <span class="font-semibold">Source:</span>
+        Originally published on Telegram by
+        <a href="https://t.me/{{ article.telegram_import.channel }}" target="_blank" rel="noopener"
+           class="font-semibold hover:underline" style="color:#1a7fc4;">
+          @{{ article.telegram_import.channel }}
+        </a>.
+        <a href="{{ article.telegram_import.source_url }}" target="_blank" rel="noopener"
+           class="ml-2 font-medium hover:underline" style="color:#1a7fc4;">
+          View original post ↗
+        </a>
+      </div>
+    </div>
   </div>
   {% endif %}
 
@@ -298,8 +336,8 @@
         btn.classList.toggle("text-white", active);
         btn.classList.toggle("border-brand", active);
         btn.classList.toggle("bg-white", !active);
-        btn.classList.toggle("text-gray-600", !active);
-        btn.classList.toggle("border-gray-200", !active);
+        btn.classList.toggle("text-slate-600", !active);
+        btn.classList.toggle("border-slate-200", !active);
       });
     });
   }

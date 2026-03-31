@@ -13,7 +13,7 @@
       theme: {
         extend: {
           colors: {
-            brand: { DEFAULT: '#2563eb', light: '#60a5fa' },
+            brand: { DEFAULT: '#0f4c81', dark: '#0b3a63', light: '#e8f4ff', accent: '#d8a038' },
           },
           fontFamily: {
             sans:    ['"Plus Jakarta Sans"', '"Noto Sans Ethiopic"', 'system-ui', 'sans-serif'],
@@ -41,6 +41,8 @@
     body.data-saver iframe,
     body.data-saver figure { display: none !important; }
     body.data-saver .card-placeholder { display: flex !important; }
+    .fade-in-up { animation: fadeInUp 450ms ease-out both; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px);} to { opacity: 1; transform: translateY(0);} }
   </style>
   <script>
     // Apply data saver before paint to avoid flicker
@@ -67,7 +69,11 @@
     }
   </script>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans antialiased">
+<body class="bg-slate-100 text-slate-900 font-sans antialiased">
+
+<div class="fixed inset-0 -z-10 pointer-events-none">
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_15%_5%,rgba(216,160,56,0.14),transparent_38%),radial-gradient(circle_at_90%_8%,rgba(15,76,129,0.20),transparent_42%),linear-gradient(#f1f5f9,#f8fafc)]"></div>
+</div>
 
 <!-- ════════════════════════════════════════
      BREAKING NEWS TICKER
@@ -136,16 +142,16 @@
       </svg>
       <div class="leading-none">
         <span class="text-xl font-display font-bold tracking-tight block">Ethiopian Daily</span>
-        <span class="text-xs text-blue-200 tracking-[0.2em] uppercase font-sans mt-0.5 block">ኢትዮጵያ ዜና</span>
+        <span class="text-xs text-white/70 tracking-[0.2em] uppercase font-sans mt-0.5 block">ኢትዮጵያ ዜና</span>
       </div>
     </a>
 
     <!-- Search -->
     <form class="hidden md:flex items-center flex-1 max-w-sm mx-4" role="search">
       <div class="relative w-full">
-        <input type="search" placeholder="Search stories…"
-               class="w-full bg-white/10 text-white placeholder-white/50 text-sm rounded-full px-4 py-1.5 pl-9
-                      border border-white/20 focus:outline-none focus:border-white/50 focus:bg-white/15 transition">
+         <input type="search" placeholder="Search stories…"
+           class="w-full bg-white/10 text-white placeholder-white/50 text-sm rounded-full px-4 py-1.5 pl-9
+             border border-white/25 focus:outline-none focus:border-white/60 focus:bg-white/20 transition">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" fill="none"
              viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -189,7 +195,7 @@
         {% endif %}
         <a href="{% url 'users:user_list' %}"
            class="hidden sm:flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition">
-          <div class="h-7 w-7 rounded-full bg-white/20 text-white text-xs font-bold flex items-center justify-center uppercase ring-1 ring-white/30">
+          <div class="h-7 w-7 rounded-full bg-white/20 text-white text-xs font-bold flex items-center justify-center uppercase ring-1 ring-white/40">
             {{ user.email|first }}
           </div>
           <span class="hidden lg:inline text-white/70 text-sm">{{ user.email }}</span>
@@ -227,7 +233,7 @@
      HERO — FEATURED STORY
 ════════════════════════════════════════ -->
 {% if featured %}
-<section class="max-w-7xl mx-auto px-4 mt-6">
+<section class="max-w-7xl mx-auto px-4 mt-6 fade-in-up">
   {% if user.is_writer or user.is_admin %}
   <div class="flex justify-end mb-1">
     <a href="{% url 'core:article_edit' featured.slug %}"
@@ -240,7 +246,7 @@
     </a>
   </div>
   {% endif %}
-  <a href="{% url 'core:article_detail' featured.slug %}" class="group block relative overflow-hidden rounded-2xl shadow-xl">
+  <a href="{% url 'core:article_detail' featured.slug %}" class="group block relative overflow-hidden rounded-3xl shadow-2xl border border-white/70">
     <!-- Image -->
     <div class="relative h-[26rem] md:h-[32rem] bg-brand overflow-hidden">
       {% if featured.image_url %}
@@ -257,7 +263,7 @@
     <div class="absolute inset-0 flex flex-col justify-end p-6 md:p-10">
       <div class="max-w-3xl">
         {% if featured.category %}
-        <span class="inline-block bg-brand text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded mb-3">
+        <span class="inline-block bg-brand-accent text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow">
           {{ featured.category.name }}
         </span>
         {% endif %}
@@ -277,8 +283,8 @@
           <span>{{ featured.reading_time }} min read</span>
         </div>
       </div>
-      <span class="mt-5 inline-flex items-center gap-2 bg-white text-brand font-semibold text-sm px-5 py-2.5 rounded-full self-start
-                   group-hover:bg-brand group-hover:text-white transition">
+      <span class="mt-5 inline-flex items-center gap-2 bg-white text-brand-dark font-semibold text-sm px-5 py-2.5 rounded-full self-start
+           group-hover:bg-brand-accent group-hover:text-white transition">
         Read Full Story
         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -293,9 +299,9 @@
      SUB-HERO GRID
 ════════════════════════════════════════ -->
 {% if sub_hero %}
-<section class="max-w-7xl mx-auto px-4 mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+<section class="max-w-7xl mx-auto px-4 mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 fade-in-up" style="animation-delay:120ms;">
   {% for article in sub_hero %}
-  <div class="group relative bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition">
+  <div class="group relative bg-white/95 rounded-2xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition">
     <a href="{% url 'core:article_detail' article.slug %}" class="block">
       <div class="overflow-hidden h-44">
         {% if article.image_url %}

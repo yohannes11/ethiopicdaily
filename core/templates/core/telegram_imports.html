@@ -21,11 +21,11 @@
 {% block content %}
 
 <!-- ── Channel fetch cards ── -->
+{% if channels %}
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-  {% for slug, label in channels.items %}
-  {% if slug == "tikvahethiopia" %}{% with bg="linear-gradient(135deg,#0a4b6e,#1a7fc4)" border="#229ED9" %}
+  {% for ch in channels %}
   <div class="relative overflow-hidden rounded-2xl shadow-md flex items-center justify-between gap-4 px-5 py-4"
-       style="background:{{ bg }}; border:1px solid {{ border }};">
+       style="background: linear-gradient(135deg, #0a4b6e, #1a7fc4); border: 1px solid #229ED9;">
     <div class="absolute -right-6 -bottom-6 opacity-10 pointer-events-none">
       <svg width="90" height="90" viewBox="0 0 140 140" fill="none">
         <path d="M52 0 H88 V52 H140 V88 H88 V140 H52 V88 H0 V52 H52 Z" fill="white"/>
@@ -39,13 +39,13 @@
         </svg>
       </div>
       <div>
-        <p class="text-white font-bold text-sm">{{ label }}</p>
-        <p class="text-white/60 text-xs">@{{ slug }}</p>
+        <p class="text-white font-bold text-sm">{{ ch.display_name }}</p>
+        <p class="text-white/60 text-xs">@{{ ch.slug }}</p>
       </div>
     </div>
     <form method="post" action="{% url 'core:fetch_telegram' %}" class="relative z-10">
       {% csrf_token %}
-      <input type="hidden" name="channel" value="{{ slug }}">
+      <input type="hidden" name="channel" value="{{ ch.slug }}">
       <button type="submit"
               class="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg transition"
               style="background:rgba(255,255,255,0.18); color:white; border:1px solid rgba(255,255,255,0.25);"
@@ -58,45 +58,14 @@
       </button>
     </form>
   </div>
-  {% endwith %}{% endif %}
-  {% if slug == "ayuzehabeshanews" %}{% with bg="linear-gradient(135deg,#1c1438,#3b0764)" border="#7c3aed" %}
-  <div class="relative overflow-hidden rounded-2xl shadow-md flex items-center justify-between gap-4 px-5 py-4"
-       style="background:{{ bg }}; border:1px solid {{ border }};">
-    <div class="absolute -right-6 -bottom-6 opacity-10 pointer-events-none">
-      <svg width="90" height="90" viewBox="0 0 140 140" fill="none">
-        <path d="M52 0 H88 V52 H140 V88 H88 V140 H52 V88 H0 V52 H52 Z" fill="white"/>
-      </svg>
-    </div>
-    <div class="flex items-center gap-3 relative z-10">
-      <div class="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
-           style="background:rgba(255,255,255,0.15);">
-        <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/>
-        </svg>
-      </div>
-      <div>
-        <p class="text-white font-bold text-sm">{{ label }}</p>
-        <p class="text-white/60 text-xs">@{{ slug }}</p>
-      </div>
-    </div>
-    <form method="post" action="{% url 'core:fetch_telegram' %}" class="relative z-10">
-      {% csrf_token %}
-      <input type="hidden" name="channel" value="{{ slug }}">
-      <button type="submit"
-              class="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg transition"
-              style="background:rgba(255,255,255,0.18); color:white; border:1px solid rgba(255,255,255,0.25);"
-              onmouseover="this.style.background='rgba(255,255,255,0.28)'"
-              onmouseout="this.style.background='rgba(255,255,255,0.18)'">
-        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-        </svg>
-        Fetch latest 5
-      </button>
-    </form>
-  </div>
-  {% endwith %}{% endif %}
   {% endfor %}
 </div>
+{% else %}
+<div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-700">
+  No active channels configured.
+  <a href="{% url 'core:channel_create' %}" class="font-semibold hover:underline ml-1">Add a channel &rarr;</a>
+</div>
+{% endif %}
 
 <!-- ── Status + channel filters ── -->
 <div class="flex flex-wrap items-center gap-3 mb-6">
@@ -118,19 +87,19 @@
   </div>
 
   <!-- Channel filter pills -->
-  <div class="flex gap-2">
+  <div class="flex flex-wrap gap-2">
     <a href="?status={{ status_filter }}"
        class="text-xs font-semibold px-3 py-2 rounded-lg transition border
               {% if not channel_filter %}text-white border-transparent{% else %}text-gray-500 border-gray-200 bg-white hover:border-gray-300{% endif %}"
        {% if not channel_filter %}style="background:#1e3a8a;"{% endif %}>
       All sources
     </a>
-    {% for slug, label in channels.items %}
-    <a href="?status={{ status_filter }}&channel={{ slug }}"
+    {% for ch in channels %}
+    <a href="?status={{ status_filter }}&channel={{ ch.slug }}"
        class="text-xs font-semibold px-3 py-2 rounded-lg transition border
-              {% if channel_filter == slug %}text-white border-transparent{% else %}text-gray-500 border-gray-200 bg-white hover:border-gray-300{% endif %}"
-       {% if channel_filter == slug %}style="background:#229ED9;"{% endif %}>
-      {{ label }}
+              {% if channel_filter == ch.slug %}text-white border-transparent{% else %}text-gray-500 border-gray-200 bg-white hover:border-gray-300{% endif %}"
+       {% if channel_filter == ch.slug %}style="background:#229ED9;"{% endif %}>
+      {{ ch.display_name }}
     </a>
     {% endfor %}
   </div>
@@ -143,21 +112,13 @@
   {% for item in imports %}
   <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
-    <!-- Channel-colored top stripe -->
+    <!-- Telegram-blue top stripe -->
     <div class="flex h-[4px]">
-      {% if item.channel == "tikvahethiopia" %}
-        <div class="flex-1" style="background:#0a4b6e;"></div>
-        <div class="flex-1" style="background:#229ED9;"></div>
-        <div class="flex-1" style="background:#C9902A;"></div>
-        <div class="flex-1" style="background:#229ED9;"></div>
-        <div class="flex-1" style="background:#0a4b6e;"></div>
-      {% else %}
-        <div class="flex-1" style="background:#3b0764;"></div>
-        <div class="flex-1" style="background:#7c3aed;"></div>
-        <div class="flex-1" style="background:#C9902A;"></div>
-        <div class="flex-1" style="background:#7c3aed;"></div>
-        <div class="flex-1" style="background:#3b0764;"></div>
-      {% endif %}
+      <div class="flex-1" style="background:#0a4b6e;"></div>
+      <div class="flex-1" style="background:#229ED9;"></div>
+      <div class="flex-1" style="background:#C9902A;"></div>
+      <div class="flex-1" style="background:#229ED9;"></div>
+      <div class="flex-1" style="background:#0a4b6e;"></div>
     </div>
 
     <div class="p-5">
@@ -167,17 +128,18 @@
           <!-- Channel badge + date + link -->
           <div class="flex flex-wrap items-center gap-2 mb-2">
             <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
-                  {% if item.channel == "tikvahethiopia" %}style="background:#e8f5fc;color:#0a7fc4;"{% else %}style="background:#f3e8ff;color:#7c3aed;"{% endif %}>
+                  style="background:#e8f5fc;color:#0a7fc4;">
               <svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/>
               </svg>
-              {{ channels|default:item.channel }}{% for slug, label in channels.items %}{% if slug == item.channel %}{{ label }}{% endif %}{% endfor %}
+              {% for ch in channels %}{% if ch.slug == item.channel %}{{ ch.display_name }}{% endif %}{% endfor %}
             </span>
+            <span class="text-xs text-gray-500 font-medium">@{{ item.channel }}</span>
             <span class="text-xs text-gray-400">{{ item.date|date:"M j, Y · H:i" }}</span>
             {% if item.source_url %}
             <a href="{{ item.source_url }}" target="_blank" rel="noopener"
                class="text-xs font-medium hover:underline ml-auto"
-               {% if item.channel == "tikvahethiopia" %}style="color:#229ED9;"{% else %}style="color:#7c3aed;"{% endif %}>
+               style="color:#229ED9;">
               View original ↗
             </a>
             {% endif %}
@@ -259,7 +221,7 @@
     {% if status_filter == 'pending' %}No pending imports
     {% elif status_filter == 'approved' %}No approved imports yet
     {% else %}No rejected imports{% endif %}
-    {% if channel_filter %} from {{ channels|default:channel_filter }}{% for slug, label in channels.items %}{% if slug == channel_filter %} {{ label }}{% endif %}{% endfor %}{% endif %}
+    {% if channel_filter %}from @{{ channel_filter }}{% endif %}
   </p>
   <p class="text-gray-400 text-sm mb-5">
     {% if status_filter == 'pending' %}Use the fetch buttons above to pull the latest news.{% else %}Nothing here yet.{% endif %}
@@ -274,7 +236,7 @@
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/>
       </svg>
-      {% if channel_filter %}Fetch from {{ channel_filter }}{% else %}Fetch from all channels{% endif %}
+      {% if channel_filter %}Fetch from @{{ channel_filter }}{% else %}Fetch from all channels{% endif %}
     </button>
   </form>
   {% endif %}
