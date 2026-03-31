@@ -103,6 +103,27 @@ def homepage(request):
     })
 
 
+def search(request):
+    query = request.GET.get("q", "").strip()
+    results = []
+    if query:
+        results = (
+            Article.objects.filter(status=Article.Status.PUBLISHED)
+            .filter(
+                models.Q(title__icontains=query)
+                | models.Q(summary__icontains=query)
+                | models.Q(content__icontains=query)
+            )
+            .select_related("category", "author")
+            .order_by("-published_at")
+        )
+    return render(request, "core/search_results.html", {
+        "query": query,
+        "results": results,
+        "categories": Category.objects.all(),
+    })
+
+
 def article_detail(request, slug):
     article = get_object_or_404(Article.objects.select_related("category", "author"), slug=slug)
 

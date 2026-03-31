@@ -7,6 +7,7 @@ app_name = "core"
 urlpatterns = [
     # Public
     path("", views.homepage, name="homepage"),
+    path("search/", views.search, name="search"),
     path("article/<slug:slug>/", views.article_detail, name="article_detail"),
     path("article/<slug:slug>/react/", views.react_to_article, name="react_to_article"),
 

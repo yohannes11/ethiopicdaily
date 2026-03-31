@@ -147,9 +147,10 @@
     </a>
 
     <!-- Search -->
-    <form class="hidden md:flex items-center flex-1 max-w-sm mx-4" role="search">
+    <form class="hidden md:flex items-center flex-1 max-w-sm mx-4" role="search"
+          action="{% url 'core:search' %}" method="get">
       <div class="relative w-full">
-         <input type="search" placeholder="Search stories…"
+         <input type="search" name="q" placeholder="Search stories…"
            class="w-full bg-white/10 text-white placeholder-white/50 text-sm px-4 py-1.5 pl-9
              border border-white/25 focus:outline-none focus:border-white/60 focus:bg-white/20 transition">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" fill="none"
