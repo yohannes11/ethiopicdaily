@@ -315,7 +315,7 @@
         {% if article.category %}
         <span class="text-xs font-bold uppercase tracking-wide text-brand">{{ article.category.name }}</span>
         {% endif %}
-        <h2 class="font-serif font-bold text-gray-900 text-base leading-snug mt-1 line-clamp-2 group-hover:text-brand transition">
+        <h2 class="font-serif font-bold text-gray-900 text-base leading-snug mt-1 line-clamp-3 group-hover:text-brand transition">
           {{ article.title }}
         </h2>
         <div class="flex items-center gap-2 mt-2 text-gray-400 text-xs">
@@ -376,7 +376,7 @@
               {% if article.category %}
               <span class="text-xs font-bold uppercase tracking-wide text-brand">{{ article.category.name }}</span>
               {% endif %}
-              <h3 class="font-semibold text-gray-900 text-sm leading-snug mt-0.5 line-clamp-2 group-hover:text-brand transition">
+              <h3 class="font-semibold text-gray-900 text-sm leading-snug mt-0.5 line-clamp-3 group-hover:text-brand transition">
                 {{ article.title }}
               </h3>
               <p class="text-gray-400 text-xs mt-1.5 flex items-center gap-1.5">
@@ -438,7 +438,7 @@
           </div>
           <div class="p-4">
             <span class="text-xs font-bold uppercase tracking-wide text-brand">{{ section.category.name }}</span>
-            <h3 class="font-serif font-bold text-gray-900 text-lg leading-snug mt-1 line-clamp-2 group-hover:text-brand transition">
+            <h3 class="font-serif font-bold text-gray-900 text-lg leading-snug mt-1 line-clamp-3 group-hover:text-brand transition">
               {{ lead.title }}
             </h3>
             <p class="text-gray-500 text-sm mt-2 line-clamp-2">{{ lead.summary }}</p>
@@ -458,11 +458,11 @@
               <div class="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400"></div>
               {% endif %}
             </div>
-            <div class="min-w-0">
-              <h3 class="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-brand transition">
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold text-gray-900 text-sm leading-snug line-clamp-3 group-hover:text-brand transition">
                 {{ article.title }}
               </h3>
-              <p class="text-gray-400 text-xs mt-1">{{ article.published_at|timesince }} ago</p>
+              <p class="text-gray-400 text-xs mt-1.5">{{ article.published_at|timesince }} ago</p>
             </div>
           </a>
           {% endfor %}

@@ -117,7 +117,10 @@ def article_detail(request, slug):
         ):
             raise Http404
 
-    Article.objects.filter(pk=article.pk).update(views_count=article.views_count + 1)
+    cookie_key = f"va_{article.pk}"
+    already_viewed = request.COOKIES.get(cookie_key)
+    if not already_viewed:
+        Article.objects.filter(pk=article.pk).update(views_count=models.F("views_count") + 1)
 
     related = (
         Article.objects.filter(category=article.category, status=Article.Status.PUBLISHED)
@@ -137,7 +140,7 @@ def article_detail(request, slug):
         if existing:
             user_reaction = existing.reaction_type
 
-    return render(request, "core/article_detail.html", {
+    response = render(request, "core/article_detail.html", {
         "article": article,
         "related": related,
         "can_edit": can_edit,
@@ -145,6 +148,9 @@ def article_detail(request, slug):
         "user_reaction": user_reaction,
         "reaction_types": Reaction.Type,
     })
+    if not already_viewed:
+        response.set_cookie(cookie_key, "1", max_age=30 * 24 * 60 * 60, httponly=True, samesite="Lax")
+    return response
 
 
 # ─────────────────────────────────────────────
