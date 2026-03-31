@@ -150,7 +150,7 @@
     <form class="hidden md:flex items-center flex-1 max-w-sm mx-4" role="search">
       <div class="relative w-full">
          <input type="search" placeholder="Search stories…"
-           class="w-full bg-white/10 text-white placeholder-white/50 text-sm rounded-full px-4 py-1.5 pl-9
+           class="w-full bg-white/10 text-white placeholder-white/50 text-sm px-4 py-1.5 pl-9
              border border-white/25 focus:outline-none focus:border-white/60 focus:bg-white/20 transition">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" fill="none"
              viewBox="0 0 24 24" stroke="currentColor">
@@ -162,7 +162,7 @@
 
     <!-- Data Saver toggle -->
     <button id="ds-btn" onclick="toggleDataSaver()"
-            class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-white/60 hover:text-white border border-white/20 rounded-full px-2.5 py-1 transition shrink-0">
+            class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-white/60 hover:text-white border border-white/20 px-2.5 py-1 transition shrink-0">
       <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
@@ -175,7 +175,7 @@
       {% if user.is_authenticated %}
         {% if user.is_writer or user.is_admin %}
         <a href="{% url 'core:editorial_dashboard' %}"
-           class="hidden sm:flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition border border-white/20 hover:border-white/50 rounded-full px-3 py-1">
+           class="hidden sm:flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition border border-white/20 hover:border-white/50 px-3 py-1">
           <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -185,7 +185,7 @@
         {% endif %}
         {% if user.is_reviewer %}
         <a href="{% url 'core:review_queue' %}"
-           class="hidden sm:flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition border border-white/20 hover:border-white/50 rounded-full px-3 py-1">
+           class="hidden sm:flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition border border-white/20 hover:border-white/50 px-3 py-1">
           <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
@@ -204,7 +204,7 @@
         <a href="{% url 'users:login' %}"
            class="text-sm text-white/70 hover:text-white transition hidden sm:inline">Sign In</a>
         <a href="{% url 'users:login' %}"
-           class="bg-white text-brand text-sm font-semibold px-4 py-1.5 rounded-full hover:bg-blue-50 transition shadow-sm">
+           class="bg-white text-brand text-sm font-semibold px-4 py-1.5 hover:bg-blue-50 transition shadow-sm">
           Subscribe
         </a>
       {% endif %}
@@ -237,7 +237,7 @@
   {% if user.is_writer or user.is_admin %}
   <div class="flex justify-end mb-1">
     <a href="{% url 'core:article_edit' featured.slug %}"
-       class="flex items-center gap-1.5 bg-brand text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow hover:bg-blue-900 transition">
+       class="flex items-center gap-1.5 bg-brand text-white text-xs font-medium px-3 py-1.5 shadow hover:bg-blue-900 transition">
       <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -246,7 +246,7 @@
     </a>
   </div>
   {% endif %}
-  <a href="{% url 'core:article_detail' featured.slug %}" class="group block relative overflow-hidden rounded-3xl shadow-2xl border border-white/70">
+  <a href="{% url 'core:article_detail' featured.slug %}" class="group block relative overflow-hidden shadow-2xl border border-white/70">
     <!-- Image -->
     <div class="relative h-[26rem] md:h-[32rem] bg-brand overflow-hidden">
       {% if featured.image_url %}
@@ -263,7 +263,7 @@
     <div class="absolute inset-0 flex flex-col justify-end p-6 md:p-10">
       <div class="max-w-3xl">
         {% if featured.category %}
-        <span class="inline-block bg-brand-accent text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow">
+        <span class="inline-block bg-brand-accent text-white text-xs font-bold uppercase tracking-widest px-3 py-1 mb-3 shadow">
           {{ featured.category.name }}
         </span>
         {% endif %}
@@ -283,7 +283,7 @@
           <span>{{ featured.reading_time }} min read</span>
         </div>
       </div>
-      <span class="mt-5 inline-flex items-center gap-2 bg-white text-brand-dark font-semibold text-sm px-5 py-2.5 rounded-full self-start
+      <span class="mt-5 inline-flex items-center gap-2 bg-white text-brand-dark font-semibold text-sm px-5 py-2.5 self-start
            group-hover:bg-brand-accent group-hover:text-white transition">
         Read Full Story
         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -301,7 +301,7 @@
 {% if sub_hero %}
 <section class="max-w-7xl mx-auto px-4 mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 fade-in-up" style="animation-delay:120ms;">
   {% for article in sub_hero %}
-  <div class="group relative bg-white/95 rounded-2xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition">
+  <div class="group relative bg-white/95 overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition">
     <a href="{% url 'core:article_detail' article.slug %}" class="block">
       <div class="overflow-hidden h-44">
         {% if article.image_url %}
@@ -333,7 +333,7 @@
     </a>
     {% if user.is_writer or user.is_admin %}
     <a href="{% url 'core:article_edit' article.slug %}"
-       class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 flex items-center gap-1 bg-brand text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow transition">
+       class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 flex items-center gap-1 bg-brand text-white text-xs font-medium px-2.5 py-1 shadow transition">
       <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -362,9 +362,9 @@
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {% for article in latest %}
-        <div class="group relative flex gap-4 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition">
+        <div class="group relative flex gap-4 bg-white p-4 shadow-sm border border-gray-100 hover:shadow-md transition">
           <a href="{% url 'core:article_detail' article.slug %}" class="flex gap-4 flex-1 min-w-0">
-            <div class="shrink-0 w-24 h-24 overflow-hidden rounded-lg bg-gray-100">
+            <div class="shrink-0 w-24 h-24 overflow-hidden bg-gray-100">
               {% if article.image_url %}
               <img src="{{ article.image_url }}" alt="{{ article.title }}"
                    class="card-img w-full h-full object-cover">
@@ -394,7 +394,7 @@
           </a>
           {% if user.is_writer or user.is_admin %}
           <a href="{% url 'core:article_edit' article.slug %}"
-             class="opacity-0 group-hover:opacity-100 self-start ml-2 shrink-0 flex items-center gap-1 bg-brand text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow transition">
+             class="opacity-0 group-hover:opacity-100 self-start ml-2 shrink-0 flex items-center gap-1 bg-brand text-white text-xs font-medium px-2.5 py-1 shadow transition">
             <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -408,7 +408,7 @@
     </section>
 
     <!-- DIVIDER AD PLACEHOLDER -->
-    <div class="w-full h-20 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 text-sm border border-dashed border-gray-300 mb-10">
+    <div class="w-full h-20 bg-gray-100 flex items-center justify-center text-gray-400 text-sm border border-dashed border-gray-300 mb-10">
       Advertisement
     </div>
 
@@ -427,7 +427,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <!-- Lead article (spans both rows on left) -->
         <a href="{% url 'core:article_detail' lead.slug %}"
-           class="group bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition">
+           class="group bg-white overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition">
           <div class="overflow-hidden h-52">
             {% if lead.image_url %}
             <img src="{{ lead.image_url }}" alt="{{ lead.title }}"
@@ -449,8 +449,8 @@
         <div class="flex flex-col gap-4">
           {% for article in rest %}
           <a href="{% url 'core:article_detail' article.slug %}"
-             class="group flex gap-3 bg-white rounded-xl p-3 shadow-sm border border-gray-100 hover:shadow-md transition">
-            <div class="shrink-0 w-20 h-20 overflow-hidden rounded-lg bg-gray-100">
+             class="group flex gap-3 bg-white p-3 shadow-sm border border-gray-100 hover:shadow-md transition">
+            <div class="shrink-0 w-20 h-20 overflow-hidden bg-gray-100">
               {% if article.image_url %}
               <img src="{{ article.image_url }}" alt="{{ article.title }}"
                    class="card-img w-full h-full object-cover">
@@ -479,7 +479,7 @@
   <aside class="lg:w-80 xl:w-96 shrink-0 space-y-8">
 
     <!-- TRENDING -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <div class="bg-white shadow-sm border border-gray-100 p-5">
       <h3 class="font-bold text-brand text-base border-b-4 border-brand pb-1 mb-4 inline-block pr-4">
         Trending
       </h3>
@@ -509,7 +509,7 @@
     </div>
 
     <!-- MOST READ -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <div class="bg-white shadow-sm border border-gray-100 p-5">
       <h3 class="font-bold text-brand text-base border-b-4 border-brand pb-1 mb-4 inline-block pr-4">
         Most Read
       </h3>
@@ -531,14 +531,14 @@
     </div>
 
     <!-- TOPICS -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <div class="bg-white shadow-sm border border-gray-100 p-5">
       <h3 class="font-bold text-brand text-base border-b-4 border-brand pb-1 mb-4 inline-block pr-4">
         Topics
       </h3>
       <div class="flex flex-wrap gap-2">
         {% for cat in categories %}
         <a href="#section-{{ cat.slug }}"
-           class="px-3 py-1 bg-gray-100 hover:bg-brand hover:text-white text-gray-700 text-xs font-medium rounded-full transition">
+           class="px-3 py-1 bg-gray-100 hover:bg-brand hover:text-white text-gray-700 text-xs font-medium transition">
           {{ cat.name }}
         </a>
         {% empty %}
@@ -548,7 +548,7 @@
     </div>
 
     <!-- NEWSLETTER -->
-    <div class="bg-brand text-white rounded-xl p-5">
+    <div class="bg-brand text-white p-5">
       <div class="flex items-center gap-2 mb-1">
         <svg class="h-5 w-5 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
           <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
@@ -559,10 +559,10 @@
       <p class="text-blue-200 text-sm mb-4">Get the top stories from Ethiopia and beyond, every morning.</p>
       <form class="space-y-2">
         <input type="email" placeholder="Your email address"
-               class="w-full bg-brand-light border border-blue-700 rounded-lg px-3 py-2 text-sm text-white
+               class="w-full bg-brand-light border border-blue-700 px-3 py-2 text-sm text-white
                       placeholder-blue-300 focus:outline-none focus:border-blue-400">
         <button type="submit"
-                class="w-full bg-brand hover:bg-blue-900 text-white font-medium text-sm py-2 rounded-lg transition">
+                class="w-full bg-brand hover:bg-blue-900 text-white font-medium text-sm py-2 transition">
           Subscribe Free
         </button>
       </form>
@@ -585,7 +585,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       {% for article in latest|slice:":4" %}
       <a href="{% url 'core:article_detail' article.slug %}"
-         class="group bg-brand-light rounded-xl overflow-hidden hover:bg-blue-900 transition">
+         class="group bg-brand-light overflow-hidden hover:bg-blue-900 transition">
         <div class="overflow-hidden h-36">
           {% if article.image_url %}
           <img src="{{ article.image_url }}" alt="{{ article.title }}"
@@ -621,7 +621,7 @@
       <!-- Brand -->
       <div class="lg:col-span-2">
         <div class="flex items-center gap-2 mb-3">
-          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white/20 text-white font-bold text-base font-serif leading-none shrink-0">E</span>
+          <span class="inline-flex items-center justify-center w-7 h-7 bg-white/20 text-white font-bold text-base font-serif leading-none shrink-0">E</span>
           <span class="text-white font-bold text-lg tracking-tight">Ethiopian Daily</span>
         </div>
         <p class="text-sm leading-relaxed mb-4">
