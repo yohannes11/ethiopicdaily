@@ -426,6 +426,100 @@
 </div>
 {% endif %}
 
+<!-- ═══ SEARCH BAR ═══ -->
+<form method="get" action="" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4">
+  <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+    <div class="relative flex-1">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none"
+           fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+      </svg>
+      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search by title, summary, or content…"
+             class="w-full pl-9 rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-200">
+    </div>
+    <select name="status"
+            class="rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-200">
+      <option value="">All statuses</option>
+      {% for val, label in status_choices %}
+      <option value="{{ val }}" {% if request.GET.status == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit"
+            class="flex items-center justify-center gap-2 text-white text-sm font-semibold px-5 py-2 rounded-lg transition shadow-sm whitespace-nowrap"
+            style="background: linear-gradient(135deg, #C9902A, #a8721d);">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+      </svg>
+      Search
+    </button>
+    {% if request.GET.q or request.GET.status or request.GET.category or request.GET.date_from or request.GET.date_to or request.GET.author_email %}
+    <a href="{% url 'core:editorial_dashboard' %}"
+       class="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition whitespace-nowrap px-2 py-2">
+      <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+      Clear
+    </a>
+    {% endif %}
+  </div>
+
+  <details class="mt-3">
+    <summary class="text-xs text-gray-400 cursor-pointer hover:text-gray-600 select-none w-fit">
+      Advanced filters ▾
+    </summary>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
+      <div>
+        <label class="block text-xs text-gray-500 mb-1 font-medium">Category</label>
+        <select name="category"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-200">
+          <option value="">All categories</option>
+          {% for cat in search_form.category.field.queryset %}
+          <option value="{{ cat.pk }}" {% if request.GET.category == cat.pk|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1 font-medium">From</label>
+        <input type="date" name="date_from" value="{{ request.GET.date_from }}"
+               class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-200">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1 font-medium">To</label>
+        <input type="date" name="date_to" value="{{ request.GET.date_to }}"
+               class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-200">
+      </div>
+      {% if user.is_admin %}
+      <div>
+        <label class="block text-xs text-gray-500 mb-1 font-medium">Author email</label>
+        <input type="text" name="author_email" value="{{ request.GET.author_email }}"
+               placeholder="Filter by author…"
+               class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-200">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1 font-medium">Featured</label>
+        <select name="is_featured"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-200">
+          <option value="">Any</option>
+          <option value="1" {% if request.GET.is_featured == "1" %}selected{% endif %}>Featured only</option>
+          <option value="0" {% if request.GET.is_featured == "0" %}selected{% endif %}>Not featured</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1 font-medium">Breaking</label>
+        <select name="is_breaking"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-200">
+          <option value="">Any</option>
+          <option value="1" {% if request.GET.is_breaking == "1" %}selected{% endif %}>Breaking only</option>
+          <option value="0" {% if request.GET.is_breaking == "0" %}selected{% endif %}>Not breaking</option>
+        </select>
+      </div>
+      {% endif %}
+    </div>
+  </details>
+</form>
+
 <!-- ═══ ARTICLES TABLE ═══ -->
 
 <!-- Section label with Amharic -->
@@ -454,7 +548,10 @@
     <div class="px-6 py-3.5 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <h3 class="text-sm font-bold text-gray-900">
-          {% if current_status %}{{ current_status|capfirst }} Articles{% else %}All Articles{% endif %}
+          {% if request.GET.q %}
+            Results for "{{ request.GET.q }}"{% if current_status %} · {{ current_status|capfirst }}{% endif %}
+          {% elif current_status %}{{ current_status|capfirst }} Articles
+          {% else %}All Articles{% endif %}
         </h3>
         {% if articles %}
         <span class="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full text-xs font-bold text-white"
@@ -463,12 +560,12 @@
         </span>
         {% endif %}
       </div>
-      {% if current_status %}
-      <a href="?" class="text-xs text-gray-400 hover:text-gray-600 transition flex items-center gap-1">
+      {% if request.GET.q or request.GET.status or request.GET.category or request.GET.date_from or request.GET.date_to or request.GET.author_email %}
+      <a href="{% url 'core:editorial_dashboard' %}" class="text-xs text-gray-400 hover:text-gray-600 transition flex items-center gap-1">
         <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
-        Clear filter
+        Clear filters
       </a>
       {% endif %}
     </div>
@@ -635,8 +732,20 @@
       </div>
       <p class="font-semibold text-gray-600 mb-1">No articles found</p>
       <p class="text-gray-400 text-sm mb-5">
-        {% if current_status %}No {{ current_status }} articles yet.{% else %}Nothing written yet — start your first story.{% endif %}
+        {% if request.GET.q or request.GET.category or request.GET.date_from or request.GET.date_to or request.GET.author_email %}
+          No articles match your search criteria. Try adjusting your filters.
+        {% elif current_status %}No {{ current_status }} articles yet.
+        {% else %}Nothing written yet — start your first story.{% endif %}
       </p>
+      {% if request.GET.q or request.GET.status or request.GET.category or request.GET.date_from or request.GET.date_to %}
+      <a href="{% url 'core:editorial_dashboard' %}"
+         class="inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-lg transition border border-gray-200 text-gray-600 hover:bg-gray-50">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        Clear search
+      </a>
+      {% else %}
       <a href="{% url 'core:article_create' %}"
          class="inline-flex items-center gap-2 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition shadow-md"
          style="background: linear-gradient(135deg, #C9902A, #a8721d);">
@@ -645,6 +754,7 @@
         </svg>
         Write your first article
       </a>
+      {% endif %}
     </div>
   </div>
   {% endif %}

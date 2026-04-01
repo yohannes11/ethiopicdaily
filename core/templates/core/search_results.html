@@ -1,107 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Search{% if query %}: {{ query }}{% endif %} — Ethiopian Daily</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=Noto+Sans+Ethiopic:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: { DEFAULT: '#0f4c81', dark: '#0b3a63', light: '#e8f4ff', accent: '#d8a038' },
-          },
-          fontFamily: {
-            sans:    ['"Plus Jakarta Sans"', '"Noto Sans Ethiopic"', 'system-ui', 'sans-serif'],
-            serif:   ['Lora', '"Noto Serif Ethiopic"', 'Georgia', 'serif'],
-            display: ['"Playfair Display"', '"Noto Serif Ethiopic"', 'Georgia', 'serif'],
-          },
-        }
-      }
-    }
-  </script>
-  <style>
-    .line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-    .line-clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-    .card-img { transition: transform .4s ease; }
-    .group:hover .card-img { transform: scale(1.04); }
-  </style>
-</head>
-<body class="bg-slate-100 text-slate-900 font-sans antialiased">
+{% extends "core/public_base.html" %}
 
-<!-- ════════════════════════════════════════
-     HEADER
-════════════════════════════════════════ -->
-<header class="bg-brand text-white sticky top-0 z-50 shadow-xl relative overflow-hidden">
-  <div class="absolute inset-0 pointer-events-none select-none" aria-hidden="true">
-    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <pattern id="tibeb" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
-          <polygon points="24,2 46,24 24,46 2,24" fill="none" stroke="white" stroke-width="1.8"/>
-          <polygon points="24,12 36,24 24,36 12,24" fill="white" fill-opacity="0.08" stroke="white" stroke-width="1.1"/>
-          <circle cx="24" cy="24" r="2.5" fill="white"/>
-          <circle cx="0"  cy="0"  r="2.5" fill="white"/>
-          <circle cx="48" cy="0"  r="2.5" fill="white"/>
-          <circle cx="0"  cy="48" r="2.5" fill="white"/>
-          <circle cx="48" cy="48" r="2.5" fill="white"/>
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#tibeb)" opacity="0.14"/>
-    </svg>
-  </div>
+{% block title %}{% if query %}Search: {{ query }}{% else %}Search{% endif %} — Ethiopian Daily{% endblock %}
 
-  <div class="relative max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-    <a href="{% url 'core:homepage' %}" class="flex items-center gap-3 shrink-0 group">
-      <svg class="h-9 w-9 shrink-0 transition group-hover:scale-110" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polygon points="10.5,18.5 11,21.5 36,9.5 33,3" fill="white" fill-opacity="0.95"/>
-        <path d="M33 3 Q39.5 6.5 36 9.5" fill="white" fill-opacity="0.95"/>
-        <circle cx="7" cy="20" r="3.2" fill="white"/>
-        <path d="M7 23.5 C5 28 4.5 32 6.5 36" stroke="white" stroke-width="3" stroke-linecap="round"/>
-        <path d="M9 22 L11 19.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        <path d="M9.5 24 L15 22" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M36.5 6 Q40 4 38 9.5" stroke="white" stroke-width="1.2" fill="none" opacity="0.6" stroke-linecap="round"/>
-        <path d="M37 5 Q42.5 3 40 10.5" stroke="white" stroke-width="0.9" fill="none" opacity="0.3" stroke-linecap="round"/>
-      </svg>
-      <div class="leading-none">
-        <span class="text-xl font-display font-bold tracking-tight block">Ethiopian Daily</span>
-        <span class="text-xs text-white/70 tracking-[0.2em] uppercase font-sans mt-0.5 block">ኢትዮጵያ ዜና</span>
-      </div>
-    </a>
+{% block search_query %}{{ query }}{% endblock %}
+{% block mobile_search_query %}{{ query }}{% endblock %}
 
-    <form class="flex items-center flex-1 max-w-lg mx-4" role="search"
-          action="{% url 'core:search' %}" method="get">
-      <div class="relative w-full">
-        <input type="search" name="q" value="{{ query }}" placeholder="Search stories…"
-               autofocus
-               class="w-full bg-white/10 text-white placeholder-white/50 text-sm px-4 py-1.5 pl-9
-                      border border-white/25 focus:outline-none focus:border-white/60 focus:bg-white/20 transition">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-      </div>
-    </form>
-
-    <a href="{% url 'core:homepage' %}"
-       class="hidden sm:flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition border border-white/20 hover:border-white/50 px-3 py-1 shrink-0">
-      ← Home
-    </a>
-  </div>
-
-  <div class="h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
-</header>
-
-<!-- ════════════════════════════════════════
-     RESULTS
-════════════════════════════════════════ -->
+{% block content %}
 <main class="max-w-4xl mx-auto px-4 py-10">
 
-  <!-- Header -->
   <div class="mb-8">
     {% if query %}
       <h1 class="text-2xl font-display font-bold text-gray-900">
@@ -117,7 +23,6 @@
   </div>
 
   {% if query and not results %}
-  <!-- No results -->
   <div class="bg-white border border-gray-100 shadow-sm p-12 text-center">
     <svg class="h-12 w-12 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -164,55 +69,4 @@
   {% endif %}
 
 </main>
-
-<!-- ════════════════════════════════════════
-     FOOTER
-════════════════════════════════════════ -->
-<footer class="bg-gray-900 text-gray-400 mt-0 pt-12 pb-8">
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 pb-10 border-b border-gray-800">
-      <div class="lg:col-span-2">
-        <div class="flex items-center gap-2 mb-3">
-          <span class="inline-flex items-center justify-center w-7 h-7 bg-white/20 text-white font-bold text-base font-serif leading-none shrink-0">E</span>
-          <span class="text-white font-bold text-lg tracking-tight">Ethiopian Daily</span>
-        </div>
-        <p class="text-sm leading-relaxed mb-4">
-          Ethiopia's most trusted source for news, analysis, and stories that matter.
-          Independent journalism for a connected world.
-        </p>
-      </div>
-      <div>
-        <h4 class="text-white font-semibold text-sm mb-3 uppercase tracking-wide">Sections</h4>
-        <ul class="space-y-2 text-sm">
-          {% for cat in categories %}
-          <li><a href="{% url 'core:homepage' %}#section-{{ cat.slug }}" class="hover:text-white transition">{{ cat.name }}</a></li>
-          {% endfor %}
-        </ul>
-      </div>
-      <div>
-        <h4 class="text-white font-semibold text-sm mb-3 uppercase tracking-wide">Company</h4>
-        <ul class="space-y-2 text-sm">
-          <li><a href="#" class="hover:text-white transition">About Us</a></li>
-          <li><a href="#" class="hover:text-white transition">Editorial Team</a></li>
-          <li><a href="#" class="hover:text-white transition">Advertise</a></li>
-          <li><a href="#" class="hover:text-white transition">Contact</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 class="text-white font-semibold text-sm mb-3 uppercase tracking-wide">Legal</h4>
-        <ul class="space-y-2 text-sm">
-          <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
-          <li><a href="#" class="hover:text-white transition">Terms of Service</a></li>
-          <li><a href="#" class="hover:text-white transition">Cookie Policy</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-      <p>© {% now "Y" %} Ethiopian Daily. All rights reserved.</p>
-      <p>Addis Ababa, Ethiopia · <a href="mailto:news@ethiopiandaily.com" class="hover:text-white transition">news@ethiopiandaily.com</a></p>
-    </div>
-  </div>
-</footer>
-
-</body>
-</html>
+{% endblock %}

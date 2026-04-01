@@ -1,0 +1,161 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Global Search | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block content_title %}<h1>Global Search</h1>{% endblock %}
+
+{% block extrastyle %}
+<style>
+  #search-filters {
+    background: var(--darkened-bg);
+    border: 1px solid var(--hairline-color);
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  #search-filters .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+    margin-bottom: 12px;
+  }
+  #search-filters label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: var(--body-fg);
+  }
+  #search-filters input[type="text"],
+  #search-filters input[type="date"] {
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--body-bg);
+    color: var(--body-fg);
+    font-size: 13px;
+  }
+  #search-filters input[type="text"] { width: 280px; }
+  #search-filters input[type="date"] { width: 150px; }
+  .type-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .type-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: normal;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .search-results-section { margin-top: 24px; }
+  .search-results-section h2 {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--body-quiet-color);
+    border-bottom: 1px solid var(--hairline-color);
+    padding-bottom: 6px;
+    margin-bottom: 0;
+  }
+  .search-results-section ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .search-results-section li {
+    padding: 7px 4px;
+    border-bottom: 1px solid var(--hairline-color);
+    font-size: 13px;
+  }
+  .search-results-section li:last-child { border-bottom: none; }
+  .result-meta {
+    color: var(--body-quiet-color);
+    font-size: 11px;
+    margin-left: 8px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+  <form method="get" action="" id="search-filters">
+    <div class="filter-row">
+      <div>
+        <label for="q">Search query</label>
+        <input type="text" name="q" id="q" value="{{ query|default:'' }}" placeholder="Search…" autofocus>
+      </div>
+      <div>
+        <label for="date_from">From date</label>
+        <input type="date" name="date_from" id="date_from" value="{{ date_from|default:'' }}">
+      </div>
+      <div>
+        <label for="date_to">To date</label>
+        <input type="date" name="date_to" id="date_to" value="{{ date_to|default:'' }}">
+      </div>
+      <div>
+        <input type="submit" value="Search" class="default">
+      </div>
+    </div>
+
+    <div>
+      <label>Filter by type</label>
+      <div class="type-checkboxes">
+        {% for t in all_types %}
+          <label>
+            <input type="checkbox" name="types" value="{{ t }}"
+              {% if t in selected_types %}checked{% endif %}>
+            {{ t|capfirst }}
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+  </form>
+
+  {% if query %}
+    {% if total == 0 %}
+      <p>No results found for <strong>{{ query }}</strong>
+        {% if date_from or date_to %}
+          (date range: {{ date_from|default:"–" }} → {{ date_to|default:"–" }})
+        {% endif %}.
+      </p>
+    {% else %}
+      <p>
+        <strong>{{ total }}</strong> result{{ total|pluralize }} for <strong>{{ query }}</strong>
+        {% if date_from or date_to %}
+          &mdash; {{ date_from|default:"–" }} → {{ date_to|default:"–" }}
+        {% endif %}
+      </p>
+
+      {% for label, group in results.items %}
+        {% with url_name=group.0 objects=group.1 %}
+          {% if objects %}
+            <div class="search-results-section">
+              <h2>{{ label }} <span class="result-meta">({{ objects|length }})</span></h2>
+              <ul>
+                {% for obj in objects %}
+                  <li>
+                    <a href="{% url 'admin:'|add:url_name obj.pk %}">{{ obj }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+  {% else %}
+    <p style="color:var(--body-quiet-color);">
+      Enter a query above to search across articles, categories, users, and Telegram data.
+    </p>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></div>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}
+{% if user.is_active and user.is_staff %}
+<nav id="global-search-nav" style="background:var(--secondary); padding:6px 12px; border-top:1px solid var(--hairline-color);">
+  <a href="{% url 'admin:global_search' %}" style="color:var(--header-link-color); font-weight:500; font-size:13px; text-decoration:none;">
+    &#128269; Global Search
+  </a>
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,11 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db import IntegrityError
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
+from .decorators import admin_required
+from .forms import CreateUserForm
 from .models import PasswordSetupToken, User
 from .services import UserService
 
@@ -36,22 +37,22 @@ def logout_view(request):
 # User list
 # ---------------------------------------------------------------------------
 
-@login_required(login_url="users:login")
+@admin_required
 def user_list(request):
-    if not request.user.is_admin():
-        messages.error(request, "Only admins can access user management.")
-        return redirect("users:login")
-
     role_filter = request.GET.get("role", "")
-    # Ignore unknown role values to avoid leaking info via ORM errors.
     if role_filter and role_filter not in User.Role.values:
         role_filter = ""
 
     qs = User.objects.all().order_by("-date_joined")
     if role_filter:
         qs = qs.filter(role=role_filter)
+
+    paginator = Paginator(qs, 20)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
     return render(request, "users/user_list.html", {
-        "users": qs,
+        "users": page_obj,
+        "page_obj": page_obj,
         "roles": User.Role.choices,
         "current_role": role_filter,
     })
@@ -61,66 +62,34 @@ def user_list(request):
 # Create user
 # ---------------------------------------------------------------------------
 
-class _FakeForm:
-    """Minimal form-like object to pass field errors back to the template."""
-    def __init__(self, data=None, errors=None):
-        self._data = data or {}
-        self._errors = errors or {}
-
-    def __getattr__(self, name):
-        class _Field:
-            def __init__(self, value, errs):
-                self.value = lambda: value
-                self.errors = errs
-        return _Field(self._data.get(name, ""), self._errors.get(name, []))
-
-
-@login_required(login_url="users:login")
+@admin_required
 def create_user(request):
-    role_choices = User.Role.choices
-    form = _FakeForm()
-
     if request.method == "POST":
-        email = request.POST.get("email", "").strip()
-        role = request.POST.get("role", "").strip()
-        first_name = request.POST.get("first_name", "").strip()
-        last_name = request.POST.get("last_name", "").strip()
-        send_email = bool(request.POST.get("send_email"))
-
-        errors = {}
-        if not email:
-            errors["email"] = ["Email is required."]
-        if not role:
-            errors["role"] = ["Role is required."]
-
-        if not errors:
+        form = CreateUserForm(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
             try:
                 UserService.create_user(
                     acting_user=request.user,
-                    email=email,
-                    role=role,
-                    first_name=first_name,
-                    last_name=last_name,
-                    send_email=send_email,
+                    email=cd["email"],
+                    role=cd["role"],
+                    first_name=cd.get("first_name", ""),
+                    last_name=cd.get("last_name", ""),
+                    send_email=cd.get("send_email", False),
                 )
-                msg = f"User {email} created."
-                if send_email:
+                msg = f"User {cd['email']} created."
+                if cd.get("send_email"):
                     msg += " A setup email has been sent."
                 messages.success(request, msg)
                 return redirect("users:user_list")
-            except IntegrityError:
-                messages.error(request, f"A user with email {email} already exists.")
             except (ValidationError, PermissionDenied) as exc:
                 messages.error(request, str(exc))
-        else:
-            form = _FakeForm(
-                data={"email": email, "role": role, "first_name": first_name, "last_name": last_name},
-                errors=errors,
-            )
+    else:
+        form = CreateUserForm()
 
     return render(request, "users/create_user.html", {
         "form": form,
-        "role_choices": role_choices,
+        "role_choices": User.Role.choices,
     })
 
 
@@ -128,12 +97,8 @@ def create_user(request):
 # User detail
 # ---------------------------------------------------------------------------
 
-@login_required(login_url="users:login")
+@admin_required
 def user_detail(request, pk):
-    if not request.user.is_admin():
-        messages.error(request, "Only admins can view user details.")
-        return redirect("users:login")
-
     profile_user = get_object_or_404(User, pk=pk)
     return render(request, "users/user_detail.html", {
         "profile_user": profile_user,
@@ -145,13 +110,9 @@ def user_detail(request, pk):
 # Update role
 # ---------------------------------------------------------------------------
 
-@login_required(login_url="users:login")
+@admin_required
 def update_role(request, pk):
     if request.method != "POST":
-        return redirect("users:user_detail", pk=pk)
-
-    if not request.user.is_admin():
-        messages.error(request, "Only admins can change roles.")
         return redirect("users:user_detail", pk=pk)
 
     profile_user = get_object_or_404(User, pk=pk)
@@ -171,13 +132,9 @@ def update_role(request, pk):
 # Delete user
 # ---------------------------------------------------------------------------
 
-@login_required(login_url="users:login")
+@admin_required
 def delete_user(request, pk):
     if request.method != "POST":
-        return redirect("users:user_detail", pk=pk)
-
-    if not request.user.is_admin():
-        messages.error(request, "Only admins can delete users.")
         return redirect("users:user_detail", pk=pk)
 
     profile_user = get_object_or_404(User, pk=pk)
@@ -191,7 +148,7 @@ def delete_user(request, pk):
 # Resend setup email
 # ---------------------------------------------------------------------------
 
-@login_required(login_url="users:login")
+@admin_required
 def resend_setup_email(request, pk):
     if request.method != "POST":
         return redirect("users:user_detail", pk=pk)
@@ -221,7 +178,9 @@ def setup_password(request):
 
         if new_password != confirm:
             messages.error(request, "Passwords do not match.")
-            return render(request, "users/setup_password.html", {"valid_token": True, "token": token_str})
+            return render(request, "users/setup_password.html", {
+                "valid_token": True, "token": token_str,
+            })
 
         try:
             UserService.setup_password(token_str=token_str, new_password=new_password)
@@ -229,6 +188,10 @@ def setup_password(request):
             return redirect("users:login")
         except ValidationError as exc:
             messages.error(request, str(exc))
-            return render(request, "users/setup_password.html", {"valid_token": True, "token": token_str})
+            return render(request, "users/setup_password.html", {
+                "valid_token": True, "token": token_str,
+            })
 
-    return render(request, "users/setup_password.html", {"valid_token": valid, "token": token_str})
+    return render(request, "users/setup_password.html", {
+        "valid_token": valid, "token": token_str,
+    })

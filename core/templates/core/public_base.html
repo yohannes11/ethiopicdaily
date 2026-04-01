@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Ethiopian Daily — Breaking News, Analysis &amp; More{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=Noto+Sans+Ethiopic:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { DEFAULT: '#0f4c81', dark: '#0b3a63', light: '#e8f4ff', accent: '#d8a038' },
+          },
+          fontFamily: {
+            sans:    ['"Plus Jakarta Sans"', '"Noto Sans Ethiopic"', 'system-ui', 'sans-serif'],
+            serif:   ['Lora', '"Noto Serif Ethiopic"', 'Georgia', 'serif'],
+            display: ['"Playfair Display"', '"Noto Serif Ethiopic"', 'Georgia', 'serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes ticker { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
+    .ticker-inner { animation: ticker 28s linear infinite; white-space: nowrap; }
+    .ticker-inner:hover { animation-play-state: paused; }
+    .line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .line-clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .card-img { transition: transform .4s ease; }
+    .group:hover .card-img { transform: scale(1.04); }
+    body.data-saver img,
+    body.data-saver video,
+    body.data-saver iframe,
+    body.data-saver figure { display: none !important; }
+    body.data-saver .card-placeholder { display: flex !important; }
+    .fade-in-up { animation: fadeInUp 450ms ease-out both; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px);} to { opacity: 1; transform: translateY(0);} }
+  </style>
+  <script>
+    if (localStorage.getItem('dataSaver') === '1') document.documentElement.classList.add('ds-pending');
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('dataSaver') === '1') document.body.classList.add('data-saver');
+      document.documentElement.classList.remove('ds-pending');
+      updateDataSaverBtn();
+    });
+    function toggleDataSaver() {
+      const on = document.body.classList.toggle('data-saver');
+      localStorage.setItem('dataSaver', on ? '1' : '0');
+      updateDataSaverBtn();
+    }
+    function updateDataSaverBtn() {
+      const on = document.body.classList.contains('data-saver');
+      const btn = document.getElementById('ds-btn');
+      if (!btn) return;
+      btn.title = on ? 'Data Saver: ON — click to disable' : 'Data Saver: OFF — click to enable';
+      btn.classList.toggle('bg-white/30', on);
+      btn.classList.toggle('text-white', true);
+      const label = document.getElementById('ds-label');
+      if (label) label.textContent = on ? 'Text Only' : 'Data Saver';
+    }
+  </script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-100 text-slate-900 font-sans antialiased">
+
+<div class="fixed inset-0 -z-10 pointer-events-none">
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_15%_5%,rgba(216,160,56,0.14),transparent_38%),radial-gradient(circle_at_90%_8%,rgba(15,76,129,0.20),transparent_42%),linear-gradient(#f1f5f9,#f8fafc)]"></div>
+</div>
+
+{% if breaking %}
+<div class="bg-brand text-white text-sm flex items-center overflow-hidden h-9">
+  <span class="shrink-0 bg-white text-brand font-bold uppercase tracking-widest text-xs px-4 py-2 mr-3">Breaking</span>
+  <div class="overflow-hidden flex-1">
+    <div class="ticker-inner">
+      <a href="{% url 'core:article_detail' breaking.slug %}" class="hover:underline">{{ breaking.title }}</a>
+      &nbsp;&nbsp;&nbsp;●&nbsp;&nbsp;&nbsp;Follow Ethiopian Daily for live updates
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<header class="bg-brand text-white sticky top-0 z-50 shadow-xl relative overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none select-none" aria-hidden="true">
+    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="tibeb" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
+          <polygon points="24,2 46,24 24,46 2,24" fill="none" stroke="white" stroke-width="1.8"/>
+          <polygon points="24,12 36,24 24,36 12,24" fill="white" fill-opacity="0.08" stroke="white" stroke-width="1.1"/>
+          <circle cx="24" cy="24" r="2.5" fill="white"/>
+          <circle cx="0"  cy="0"  r="2.5" fill="white"/>
+          <circle cx="48" cy="0"  r="2.5" fill="white"/>
+          <circle cx="0"  cy="48" r="2.5" fill="white"/>
+          <circle cx="48" cy="48" r="2.5" fill="white"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#tibeb)" opacity="0.14"/>
+    </svg>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+    <a href="{% url 'core:homepage' %}" class="flex items-center gap-3 shrink-0 group">
+      <svg class="h-9 w-9 shrink-0 transition group-hover:scale-110" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="10.5,18.5 11,21.5 36,9.5 33,3" fill="white" fill-opacity="0.95"/>
+        <path d="M33 3 Q39.5 6.5 36 9.5" fill="white" fill-opacity="0.95"/>
+        <circle cx="7" cy="20" r="3.2" fill="white"/>
+        <path d="M7 23.5 C5 28 4.5 32 6.5 36" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <path d="M9 22 L11 19.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <path d="M9.5 24 L15 22" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M36.5 6 Q40 4 38 9.5" stroke="white" stroke-width="1.2" fill="none" opacity="0.6" stroke-linecap="round"/>
+        <path d="M37 5 Q42.5 3 40 10.5" stroke="white" stroke-width="0.9" fill="none" opacity="0.3" stroke-linecap="round"/>
+      </svg>
+      <div class="leading-none">
+        <span class="text-xl font-display font-bold tracking-tight block">Ethiopian Daily</span>
+        <span class="text-xs text-white/70 tracking-[0.2em] uppercase font-sans mt-0.5 block">ኢትዮጵያ ዜና</span>
+      </div>
+    </a>
+
+    <form class="hidden md:flex items-center flex-1 max-w-sm mx-4" role="search"
+          action="{% url 'core:search' %}" method="get">
+      <div class="relative w-full">
+        <input type="search" name="q" value="{% block search_query %}{% endblock %}" placeholder="Search stories…"
+               class="w-full bg-white/10 text-white placeholder-white/50 text-sm px-4 py-1.5 pl-9
+                      border border-white/25 focus:outline-none focus:border-white/60 focus:bg-white/20 transition">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+    </form>
+
+    <!-- Mobile search toggle -->
+    <button id="mobile-search-btn" class="md:hidden text-white/70 hover:text-white p-1" aria-label="Search">
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+    </button>
+
+    <button id="ds-btn" onclick="toggleDataSaver()"
+            class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-white/60 hover:text-white border border-white/20 px-2.5 py-1 transition shrink-0">
+      <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+      </svg>
+      <span id="ds-label">Data Saver</span>
+    </button>
+
+    <div class="flex items-center gap-3 shrink-0">
+      {% if user.is_authenticated %}
+        {% if user.is_writer or user.is_admin %}
+        <a href="{% url 'core:editorial_dashboard' %}"
+           class="hidden sm:flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition border border-white/20 hover:border-white/50 px-3 py-1">
+          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+          Newsroom
+        </a>
+        {% endif %}
+        {% if user.is_reviewer %}
+        <a href="{% url 'core:review_queue' %}"
+           class="hidden sm:flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition border border-white/20 hover:border-white/50 px-3 py-1">
+          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+          </svg>
+          Review Queue
+        </a>
+        {% endif %}
+        <a href="{% url 'users:user_list' %}"
+           class="hidden sm:flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition">
+          <div class="h-7 w-7 rounded-full bg-white/20 text-white text-xs font-bold flex items-center justify-center uppercase ring-1 ring-white/40">
+            {{ user.email|first }}
+          </div>
+          <span class="hidden lg:inline text-white/70 text-sm">{{ user.email }}</span>
+        </a>
+      {% else %}
+        <a href="{% url 'users:login' %}"
+           class="text-sm text-white/70 hover:text-white transition hidden sm:inline">Sign In</a>
+        <a href="{% url 'users:login' %}"
+           class="bg-white text-brand text-sm font-semibold px-4 py-1.5 hover:bg-blue-50 transition shadow-sm">
+          Subscribe
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Mobile search bar (hidden until toggled) -->
+  <div id="mobile-search-bar" class="md:hidden hidden px-4 py-2 border-t border-white/10 bg-brand/95">
+    <form role="search" action="{% url 'core:search' %}" method="get">
+      <div class="relative">
+        <input type="search" name="q" value="{% block mobile_search_query %}{% endblock %}"
+               placeholder="Search stories…"
+               id="mobile-search-input"
+               class="w-full bg-white/10 text-white placeholder-white/50 text-sm px-4 py-2 pl-9
+                      border border-white/25 focus:outline-none focus:border-white/60 focus:bg-white/20 transition">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+    </form>
+  </div>
+
+  <nav class="relative border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-4 flex items-center gap-0 overflow-x-auto scrollbar-hide">
+      {% for cat in categories %}
+      <a href="{% url 'core:homepage' %}#section-{{ cat.slug }}"
+         class="shrink-0 text-sm font-medium text-white/60 hover:text-white px-4 py-2.5
+                border-b-2 border-transparent hover:border-white transition-all whitespace-nowrap">
+        {{ cat.name }}
+      </a>
+      {% endfor %}
+    </div>
+  </nav>
+
+  <div class="h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+</header>
+<script>
+  document.getElementById('mobile-search-btn').addEventListener('click', function () {
+    var bar = document.getElementById('mobile-search-bar');
+    bar.classList.toggle('hidden');
+    if (!bar.classList.contains('hidden')) {
+      document.getElementById('mobile-search-input').focus();
+    }
+  });
+</script>
+
+{% block content %}{% endblock %}
+
+<footer class="bg-gray-900 text-gray-400 mt-0 pt-12 pb-8">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 pb-10 border-b border-gray-800">
+      <div class="lg:col-span-2">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="inline-flex items-center justify-center w-7 h-7 bg-white/20 text-white font-bold text-base font-serif leading-none shrink-0">E</span>
+          <span class="text-white font-bold text-lg tracking-tight">Ethiopian Daily</span>
+        </div>
+        <p class="text-sm leading-relaxed mb-4">
+          Ethiopia's most trusted source for news, analysis, and stories that matter.
+          Independent journalism for a connected world.
+        </p>
+        <div class="flex gap-3">
+          <a href="#" aria-label="Twitter"
+             class="h-8 w-8 rounded-full bg-gray-800 hover:bg-blue-500 flex items-center justify-center transition">
+            <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"/>
+            </svg>
+          </a>
+          <a href="#" aria-label="Facebook"
+             class="h-8 w-8 rounded-full bg-gray-800 hover:bg-blue-700 flex items-center justify-center transition">
+            <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd"/>
+            </svg>
+          </a>
+          <a href="#" aria-label="Telegram"
+             class="h-8 w-8 rounded-full bg-gray-800 hover:bg-sky-500 flex items-center justify-center transition">
+            <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/>
+            </svg>
+          </a>
+          <a href="#" aria-label="YouTube"
+             class="h-8 w-8 rounded-full bg-gray-800 hover:bg-red-600 flex items-center justify-center transition">
+            <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path fill-rule="evenodd" d="M19.812 5.418c.861.23 1.538.907 1.768 1.768C21.998 8.746 22 12 22 12s0 3.255-.418 4.814a2.504 2.504 0 0 1-1.768 1.768c-1.56.419-7.814.419-7.814.419s-6.255 0-7.814-.419a2.505 2.505 0 0 1-1.768-1.768C2 15.255 2 12 2 12s0-3.255.417-4.814a2.507 2.507 0 0 1 1.768-1.768C5.744 5 11.998 5 11.998 5s6.255 0 7.814.418ZM15.194 12 10 15V9l5.194 3Z" clip-rule="evenodd"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-3 uppercase tracking-wide">Sections</h4>
+        <ul class="space-y-2 text-sm">
+          {% for cat in categories %}
+          <li><a href="{% url 'core:homepage' %}#section-{{ cat.slug }}" class="hover:text-white transition">{{ cat.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-3 uppercase tracking-wide">Company</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-white transition">About Us</a></li>
+          <li><a href="#" class="hover:text-white transition">Editorial Team</a></li>
+          <li><a href="#" class="hover:text-white transition">Advertise</a></li>
+          <li><a href="#" class="hover:text-white transition">Careers</a></li>
+          <li><a href="#" class="hover:text-white transition">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-3 uppercase tracking-wide">Legal</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+          <li><a href="#" class="hover:text-white transition">Terms of Service</a></li>
+          <li><a href="#" class="hover:text-white transition">Cookie Policy</a></li>
+          <li><a href="#" class="hover:text-white transition">Corrections</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <p>© {% now "Y" %} Ethiopian Daily. All rights reserved.</p>
+      <p>Addis Ababa, Ethiopia · <a href="mailto:news@ethiopiandaily.com" class="hover:text-white transition">news@ethiopiandaily.com</a></p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

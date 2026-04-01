@@ -45,8 +45,8 @@
         </label>
         <textarea name="title" rows="2" required placeholder="Write a compelling headline…"
                   class="w-full text-xl font-bold text-gray-900 placeholder-gray-300 border-0 outline-none resize-none leading-snug
-                         {% if errors.title %}border border-red-400 rounded px-2{% endif %}">{% if editing %}{{ article.title }}{% elif form_data.title %}{{ form_data.title }}{% endif %}</textarea>
-        {% if errors.title %}<p class="text-red-500 text-xs mt-1">{{ errors.title }}</p>{% endif %}
+                         {% if form.title.errors %}border border-red-400 rounded px-2{% endif %}">{{ form.title.value }}</textarea>
+        {% if form.title.errors %}<p class="text-red-500 text-xs mt-1">{{ form.title.errors.0 }}</p>{% endif %}
       </div>
 
       <!-- Summary -->
@@ -57,9 +57,9 @@
         <textarea name="summary" rows="3" required maxlength="500"
                   placeholder="A 1-2 sentence summary that appears in article cards and search results…"
                   class="w-full text-base text-gray-700 placeholder-gray-300 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-brand resize-none leading-relaxed
-                         {% if errors.summary %}border-red-400{% endif %}">{% if editing %}{{ article.summary }}{% elif form_data.summary %}{{ form_data.summary }}{% endif %}</textarea>
+                         {% if form.summary.errors %}border-red-400{% endif %}">{{ form.summary.value }}</textarea>
         <div class="flex justify-between mt-1">
-          {% if errors.summary %}<p class="text-red-500 text-xs">{{ errors.summary }}</p>{% else %}<span></span>{% endif %}
+          {% if form.summary.errors %}<p class="text-red-500 text-xs">{{ form.summary.errors.0 }}</p>{% else %}<span></span>{% endif %}
           <p class="text-xs text-gray-400">Max 500 characters</p>
         </div>
       </div>
@@ -69,15 +69,14 @@
         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
           Article Body <span class="text-brand">*</span>
         </label>
-        <!-- Simple toolbar hint -->
         <div class="flex gap-2 mb-3 pb-3 border-b border-gray-100">
           <span class="text-xs text-gray-400">Tip: Use blank lines to separate paragraphs.</span>
         </div>
         <textarea name="content" rows="22" required
                   placeholder="Write your article here. Separate paragraphs with a blank line…"
                   class="w-full text-base text-gray-800 placeholder-gray-300 border border-gray-200 rounded-lg px-3 py-3 outline-none focus:border-brand resize-y font-mono leading-relaxed
-                         {% if errors.content %}border-red-400{% endif %}">{% if editing %}{{ article.content }}{% elif form_data.content %}{{ form_data.content }}{% endif %}</textarea>
-        {% if errors.content %}<p class="text-red-500 text-xs mt-1">{{ errors.content }}</p>{% endif %}
+                         {% if form.content.errors %}border-red-400{% endif %}">{{ form.content.value }}</textarea>
+        {% if form.content.errors %}<p class="text-red-500 text-xs mt-1">{{ form.content.errors.0 }}</p>{% endif %}
       </div>
 
     </div>
@@ -147,8 +146,7 @@
           <option value="">— No category —</option>
           {% for cat in categories %}
           <option value="{{ cat.pk }}"
-            {% if editing and article.category_id == cat.pk %}selected
-            {% elif form_data.category == cat.pk|stringformat:"s" %}selected{% endif %}>
+            {% if form.category.value == cat.pk|stringformat:"s" %}selected{% endif %}>
             {{ cat.name }}
           </option>
           {% endfor %}
@@ -159,7 +157,7 @@
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
         <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Cover Image URL</h3>
         <input type="url" name="image_url"
-               value="{% if editing %}{{ article.image_url }}{% elif form_data.image_url %}{{ form_data.image_url }}{% endif %}"
+               value="{{ form.image_url.value|default:'' }}"
                placeholder="https://example.com/image.jpg"
                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand">
         {% if editing and article.image_url %}
@@ -176,20 +174,20 @@
           <span class="text-gray-400 font-normal normal-case tracking-normal">(optional)</span>
         </h3>
         <input type="url" name="video_url"
-               value="{% if editing %}{{ article.video_url }}{% elif form_data.video_url %}{{ form_data.video_url }}{% endif %}"
+               value="{{ form.video_url.value|default:'' }}"
                placeholder="YouTube, Vimeo, or direct .mp4 link"
                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand">
         <p class="text-xs text-gray-400 mt-2">Supports YouTube, Vimeo, and direct video files.</p>
       </div>
 
-      <!-- Admin-only toggles -->
-      {% if user.is_admin %}
+      <!-- Admin-only toggles (field only exists in form for admins) -->
+      {% if form.is_featured %}
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
         <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Admin Settings</h3>
         <div class="space-y-3">
           <label class="flex items-center gap-3 cursor-pointer">
             <input type="checkbox" name="is_featured"
-                   {% if editing and article.is_featured %}checked{% elif form_data.is_featured %}checked{% endif %}
+                   {% if form.is_featured.value %}checked{% endif %}
                    class="h-4 w-4 rounded border-gray-300 text-brand focus:ring-brand">
             <div>
               <p class="text-sm font-medium text-gray-700">Feature on homepage</p>
@@ -198,7 +196,7 @@
           </label>
           <label class="flex items-center gap-3 cursor-pointer">
             <input type="checkbox" name="is_breaking"
-                   {% if editing and article.is_breaking %}checked{% elif form_data.is_breaking %}checked{% endif %}
+                   {% if form.is_breaking.value %}checked{% endif %}
                    class="h-4 w-4 rounded border-gray-300 text-brand focus:ring-brand">
             <div>
               <p class="text-sm font-medium text-gray-700">Breaking news</p>

@@ -94,10 +94,10 @@
                      alt="Image {{ forloop.counter }}"
                      class="w-full h-full object-cover block"
                      loading="lazy"
-                     onerror="this.closest('.img-tile').style.display='none'">
-                <!-- Gold check overlay (hidden by default, shown via JS) -->
-                <div class="img-overlay absolute inset-0 hidden flex-col items-center justify-center"
-                     style="background:rgba(201,144,42,0.18);">
+                     onerror="this.closest('.img-tile').remove()">
+                <!-- Check overlay — hidden via inline style, shown by JS -->
+                <div class="img-overlay absolute inset-0 flex items-center justify-center"
+                     style="display:none; background:rgba(201,144,42,0.18);">
                   <svg class="h-9 w-9" style="color:#C9902A; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3));"
                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -119,13 +119,14 @@
                   </svg>
                   <span class="text-xs text-gray-400">No image</span>
                 </div>
-                <div class="img-overlay absolute inset-0 hidden flex-col items-center justify-center"
-                     style="background:rgba(100,116,139,0.12);">
+                <div class="img-overlay absolute inset-0 flex items-center justify-center"
+                     style="display:none; background:rgba(100,116,139,0.12);">
                   <svg class="h-9 w-9 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
                 </div>
               </div>
+              <span class="block text-center text-xs text-gray-400 mt-1">No image</span>
             </label>
 
           </div>
@@ -135,31 +136,29 @@
 
           <script>
             (function () {
-              var tiles   = document.querySelectorAll('#img-picker .img-tile');
-              var hidden  = document.getElementById('img-value');
-              var GOLD    = '#C9902A';
-              var SLATE   = '#64748b';
+              var picker = document.getElementById('img-picker');
+              var hidden = document.getElementById('img-value');
+              var GOLD   = '#C9902A';
+              var SLATE  = '#64748b';
 
               function select(tile) {
-                tiles.forEach(function (t) {
-                  var frame   = t.querySelector('.img-frame');
-                  var overlay = t.querySelector('.img-overlay');
-                  frame.style.borderColor = '';
-                  overlay.style.display   = 'none';
+                picker.querySelectorAll('.img-tile').forEach(function (t) {
+                  t.querySelector('.img-frame').style.borderColor = '';
+                  t.querySelector('.img-overlay').style.display   = 'none';
                 });
-                var val     = tile.getAttribute('data-value');
-                var frame   = tile.querySelector('.img-frame');
-                var overlay = tile.querySelector('.img-overlay');
-                frame.style.borderColor = val ? GOLD : SLATE;
-                overlay.style.display   = 'flex';
+                var val = tile.getAttribute('data-value');
+                tile.querySelector('.img-frame').style.borderColor = val ? GOLD : SLATE;
+                tile.querySelector('.img-overlay').style.display   = 'flex';
                 hidden.value = val;
               }
 
               // Default: select "No image" tile (last one)
+              var tiles = picker.querySelectorAll('.img-tile');
               select(tiles[tiles.length - 1]);
 
-              tiles.forEach(function (tile) {
-                tile.addEventListener('click', function () { select(tile); });
+              picker.addEventListener('click', function (e) {
+                var tile = e.target.closest('.img-tile');
+                if (tile) select(tile);
               });
             })();
           </script>
