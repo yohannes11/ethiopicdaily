@@ -217,15 +217,39 @@ def article_delete(request, slug):
         return redirect("core:editorial_dashboard")
 
     article = get_object_or_404(Article, slug=slug)
-    if article.status != Article.Status.DRAFT or (
-        not request.user.is_admin() and article.author != request.user
-    ):
+
+    # Admins can delete any article; writers can only delete their own drafts
+    if request.user.is_admin():
+        pass
+    elif article.status != Article.Status.DRAFT or article.author != request.user:
         messages.error(request, "Only draft articles owned by you can be deleted.")
+        return redirect("core:editorial_dashboard")
+
+    if request.POST.get("confirmation") != "I AGREE":
+        messages.error(request, "Deletion cancelled — confirmation text did not match.")
         return redirect("core:editorial_dashboard")
 
     title = article.title
     article.delete()
     messages.success(request, f"Article '{title}' deleted.")
+    return redirect("core:editorial_dashboard")
+
+
+@writer_required
+def article_wipe_all(request):
+    if request.method != "POST":
+        return redirect("core:editorial_dashboard")
+
+    if not request.user.is_admin():
+        messages.error(request, "Only admins can wipe all articles.")
+        return redirect("core:editorial_dashboard")
+
+    if request.POST.get("confirmation") != "I AGREE":
+        messages.error(request, "Wipe cancelled — confirmation text did not match.")
+        return redirect("core:editorial_dashboard")
+
+    count, _ = Article.objects.all().delete()
+    messages.success(request, f"All {count} articles have been permanently deleted.")
     return redirect("core:editorial_dashboard")
 
 

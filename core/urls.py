@@ -19,6 +19,7 @@ urlpatterns = [
     path("editorial/<slug:slug>/withdraw/", views.article_withdraw, name="article_withdraw"),
     path("editorial/<slug:slug>/delete/", views.article_delete, name="article_delete"),
     path("editorial/<slug:slug>/preview/", views.article_preview, name="article_preview"),
+    path("editorial/wipe-all/", views.article_wipe_all, name="article_wipe_all"),
 
     # Review — reviewers + admins
     path("review/", views.review_queue, name="review_queue"),
