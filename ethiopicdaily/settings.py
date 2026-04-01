@@ -71,6 +71,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.telegram_channels',
                 'core.context_processors.global_context',
+                'core.context_processors.active_ads',
             ],
         },
     },

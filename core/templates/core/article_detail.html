@@ -92,6 +92,12 @@
   </figure>
   {% endif %}
 
+  {% if ads.article_top %}
+  <div class="flex justify-center mb-8">
+    {{ ads.article_top.ad_code|safe }}
+  </div>
+  {% endif %}
+
   <div class="prose prose-lg max-w-none font-serif text-slate-800 leading-relaxed space-y-5 bg-white/90 border border-white p-5 sm:p-8 shadow-sm">
     {{ article.content|linebreaksbr }}
   </div>
@@ -155,6 +161,12 @@
            class="ml-2 font-medium hover:underline" style="color:#1a7fc4;">View original post ↗</a>
       </div>
     </div>
+  </div>
+  {% endif %}
+
+  {% if ads.article_bottom %}
+  <div class="flex justify-center mt-10 mb-2">
+    {{ ads.article_bottom.ad_code|safe }}
   </div>
   {% endif %}
 

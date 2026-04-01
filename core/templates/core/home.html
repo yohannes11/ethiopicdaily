@@ -64,6 +64,12 @@
 </section>
 {% endif %}
 
+{% if ads.homepage_banner %}
+<div class="max-w-7xl mx-auto px-4 mt-5 flex justify-center">
+  {{ ads.homepage_banner.ad_code|safe }}
+</div>
+{% endif %}
+
 <!-- ════════════════════════════════════════
      SUB-HERO GRID
 ════════════════════════════════════════ -->
@@ -174,10 +180,11 @@
       </div>
     </section>
 
-    <!-- DIVIDER AD PLACEHOLDER -->
-    <div class="w-full h-20 bg-gray-100 flex items-center justify-center text-gray-400 text-sm border border-dashed border-gray-300 mb-10">
-      Advertisement
+    {% if ads.homepage_banner %}
+    <div class="flex justify-center mb-10">
+      {{ ads.homepage_banner.ad_code|safe }}
     </div>
+    {% endif %}
 
     <!-- PER-CATEGORY SECTIONS -->
     {% for section in category_sections %}
@@ -281,6 +288,12 @@
         {% endfor %}
       </ol>
     </div>
+
+    {% if ads.homepage_sidebar %}
+    <div class="flex justify-center">
+      {{ ads.homepage_sidebar.ad_code|safe }}
+    </div>
+    {% endif %}
 
     <!-- TOPICS -->
     <div class="bg-white shadow-sm border border-gray-100 p-5">

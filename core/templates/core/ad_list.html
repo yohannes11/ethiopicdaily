@@ -1,0 +1,219 @@
+{% extends "core/cms_base.html" %}
+{% block title %}Advertisements{% endblock %}
+{% block page_title %}Advertisements{% endblock %}
+{% block page_subtitle %}Manage Google AdSense placements across the site{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'core:ad_create' %}"
+   class="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition shadow-sm"
+   style="background: linear-gradient(135deg, #C9902A, #a8721d);">
+  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+  </svg>
+  New Ad
+</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Summary pills -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+    <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-1">Total Ads</p>
+    <p class="text-2xl font-bold text-gray-900">{{ total }}</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+    <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-1">Active</p>
+    <p class="text-2xl font-bold text-emerald-600">{{ active_count }}</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+    <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-1">Paused</p>
+    <p class="text-2xl font-bold text-gray-400">{{ total|add:"-"|add:active_count }}</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+    <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-1">Slots Available</p>
+    <p class="text-2xl font-bold" style="color:#C9902A;">4</p>
+  </div>
+</div>
+
+<!-- AdSense placement guide -->
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
+  <div class="flex items-center gap-2 mb-3">
+    <svg class="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <h3 class="text-sm font-bold text-gray-800">Placement Guide</h3>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-600">
+    <div class="flex items-start gap-2">
+      <span class="inline-block h-5 w-5 rounded bg-amber-100 text-amber-700 font-bold text-center leading-5 shrink-0">1</span>
+      <div><strong>Homepage — Top Banner</strong><br>728×90 leaderboard shown above the article grid. High visibility, above the fold.</div>
+    </div>
+    <div class="flex items-start gap-2">
+      <span class="inline-block h-5 w-5 rounded bg-amber-100 text-amber-700 font-bold text-center leading-5 shrink-0">2</span>
+      <div><strong>Homepage — Sidebar</strong><br>300×250 medium rectangle in the right sidebar between Most Read and Topics. High CTR placement.</div>
+    </div>
+    <div class="flex items-start gap-2">
+      <span class="inline-block h-5 w-5 rounded bg-amber-100 text-amber-700 font-bold text-center leading-5 shrink-0">3</span>
+      <div><strong>Article — After Image</strong><br>Responsive ad shown directly after the article's featured image. Reader is already engaged.</div>
+    </div>
+    <div class="flex items-start gap-2">
+      <span class="inline-block h-5 w-5 rounded bg-amber-100 text-amber-700 font-bold text-center leading-5 shrink-0">4</span>
+      <div><strong>Article — Above Related Stories</strong><br>728×90 shown after the article content, before related stories. Catches readers who finished the article.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Ads by placement -->
+{% for placement, group in by_placement.items %}
+<div class="mb-6">
+  <div class="flex items-center gap-3 mb-3">
+    <span class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ group.label }}</span>
+    <div class="flex-1 h-px bg-gray-100"></div>
+    {% if group.ads %}
+    <span class="text-xs font-semibold px-2 py-0.5 rounded-full
+      {% if group.ads|length == 1 and group.ads.0.is_active %}bg-emerald-100 text-emerald-700
+      {% else %}bg-gray-100 text-gray-500{% endif %}">
+      {{ group.ads|length }} ad{{ group.ads|length|pluralize }}
+    </span>
+    {% else %}
+    <span class="text-xs text-gray-300">empty</span>
+    {% endif %}
+  </div>
+
+  {% if group.ads %}
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-gray-50 text-xs text-gray-400 uppercase tracking-widest bg-gray-50/50">
+          <th class="px-5 py-3 text-left font-semibold">Name</th>
+          <th class="px-5 py-3 text-left font-semibold hidden md:table-cell">Preview</th>
+          <th class="px-5 py-3 text-left font-semibold">Status</th>
+          <th class="px-5 py-3 text-left font-semibold hidden lg:table-cell">Updated</th>
+          <th class="px-5 py-3 text-right font-semibold">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ad in group.ads %}
+        <tr class="border-b border-gray-50 last:border-0 hover:bg-amber-50/20 transition">
+          <td class="px-5 py-4">
+            <p class="font-semibold text-gray-900 text-sm">{{ ad.name }}</p>
+          </td>
+          <td class="px-5 py-4 hidden md:table-cell max-w-xs">
+            <code class="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded block truncate font-mono">
+              {{ ad.ad_code|truncatechars:60 }}
+            </code>
+          </td>
+          <td class="px-5 py-4">
+            {% if ad.is_active %}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Active
+            </span>
+            {% else %}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
+              <span class="h-1.5 w-1.5 rounded-full bg-gray-400"></span>
+              Paused
+            </span>
+            {% endif %}
+          </td>
+          <td class="px-5 py-4 text-gray-400 text-xs hidden lg:table-cell">{{ ad.updated_at|timesince }} ago</td>
+          <td class="px-5 py-4 text-right">
+            <div class="flex items-center justify-end gap-2">
+              <a href="{% url 'core:ad_edit' ad.pk %}"
+                 class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition">
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Edit
+              </a>
+              <form method="post" action="{% url 'core:ad_toggle' ad.pk %}" class="inline">
+                {% csrf_token %}
+                <button type="submit"
+                        class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition
+                               {% if ad.is_active %}bg-amber-50 text-amber-600 hover:bg-amber-100{% else %}bg-emerald-50 text-emerald-600 hover:bg-emerald-100{% endif %}">
+                  {% if ad.is_active %}Pause{% else %}Activate{% endif %}
+                </button>
+              </form>
+              <button type="button"
+                      onclick="openAdDeleteModal({{ ad.pk }}, '{{ ad.name|escapejs }}')"
+                      class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition">
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="bg-white rounded-2xl border border-dashed border-gray-200 py-8 text-center">
+    <p class="text-sm text-gray-400 mb-3">No ad in this slot yet.</p>
+    <a href="{% url 'core:ad_create' %}?placement={{ placement }}"
+       class="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg text-white"
+       style="background: linear-gradient(135deg, #C9902A, #a8721d);">
+      Add ad for this slot
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endfor %}
+
+<!-- Delete modal -->
+<div id="adDeleteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4"
+     style="background: rgba(0,0,0,0.6);">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="h-10 w-10 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
+        <svg class="h-5 w-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-sm font-bold text-gray-900">Delete Ad</h3>
+        <p id="adDeleteName" class="text-xs text-gray-400"></p>
+      </div>
+    </div>
+    <p class="text-sm text-gray-600 mb-4">This will permanently remove the ad. It will stop showing immediately.</p>
+    <form id="adDeleteForm" method="post" action="">
+      {% csrf_token %}
+      <div class="flex gap-3 justify-end">
+        <button type="button" onclick="closeAdDeleteModal()"
+                class="text-sm font-medium px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
+          Cancel
+        </button>
+        <button type="submit"
+                class="text-sm font-semibold px-4 py-2 rounded-lg text-white"
+                style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+          Delete
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openAdDeleteModal(pk, name) {
+    document.getElementById("adDeleteName").textContent = name;
+    document.getElementById("adDeleteForm").action = "/ads/" + pk + "/delete/";
+    const modal = document.getElementById("adDeleteModal");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+  function closeAdDeleteModal() {
+    const modal = document.getElementById("adDeleteModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+  document.getElementById("adDeleteModal").addEventListener("click", function(e) {
+    if (e.target === this) closeAdDeleteModal();
+  });
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") closeAdDeleteModal();
+  });
+</script>
+
+{% endblock %}

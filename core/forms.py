@@ -1,5 +1,5 @@
 from django import forms
-from .models import Article, Category, TelegramChannel
+from .models import Advertisement, Article, Category, TelegramChannel
 
 
 class ArticleForm(forms.ModelForm):
@@ -58,6 +58,42 @@ class ChannelForm(forms.ModelForm):
     def clean_fetch_interval(self):
         value = self.cleaned_data.get('fetch_interval', 5)
         return max(1, int(value))
+
+
+class AdvertisementForm(forms.ModelForm):
+    class Meta:
+        model = Advertisement
+        fields = ['name', 'placement', 'ad_code', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200',
+                'placeholder': 'e.g. Google AdSense — Homepage Banner',
+            }),
+            'placement': forms.Select(attrs={
+                'class': 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200',
+            }),
+            'ad_code': forms.Textarea(attrs={
+                'class': 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-200',
+                'rows': 8,
+                'placeholder': 'Paste your <ins class="adsbygoogle"> ... </ins> code here',
+                'spellcheck': 'false',
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-200',
+            }),
+        }
+
+    def clean_name(self):
+        value = self.cleaned_data.get('name', '').strip()
+        if not value:
+            raise forms.ValidationError("Name is required.")
+        return value
+
+    def clean_ad_code(self):
+        value = self.cleaned_data.get('ad_code', '').strip()
+        if not value:
+            raise forms.ValidationError("Ad code is required.")
+        return value
 
 
 class ArticleSearchForm(forms.Form):

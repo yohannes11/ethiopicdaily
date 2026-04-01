@@ -1,7 +1,7 @@
 """
 Template context processors for the core app.
 """
-from .models import Article, Category, TelegramChannel
+from .models import Advertisement, Article, Category, TelegramChannel
 
 
 def telegram_channels(request):
@@ -30,3 +30,18 @@ def global_context(request):
         "categories": Category.objects.all(),
         "breaking": breaking,
     }
+
+
+def active_ads(request):
+    """
+    Inject active advertisements keyed by placement into every template context.
+    Only one ad per placement slot is served (the most recently updated active one).
+    Usage in templates: {{ ads.homepage_banner.ad_code|safe }}
+    """
+    ads = Advertisement.objects.filter(is_active=True)
+    ads_map = {}
+    for ad in ads:
+        # First active ad per placement wins
+        if ad.placement not in ads_map:
+            ads_map[ad.placement] = ad
+    return {"ads": ads_map}

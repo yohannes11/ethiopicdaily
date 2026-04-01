@@ -37,4 +37,11 @@ urlpatterns = [
     path("channels/add/", views.channel_create, name="channel_create"),
     path("channels/<int:pk>/toggle/", views.channel_toggle, name="channel_toggle"),
     path("channels/<int:pk>/delete/", views.channel_delete, name="channel_delete"),
+
+    # Advertisement management — admins only
+    path("ads/", views.ad_list, name="ad_list"),
+    path("ads/new/", views.ad_create, name="ad_create"),
+    path("ads/<int:pk>/edit/", views.ad_edit, name="ad_edit"),
+    path("ads/<int:pk>/toggle/", views.ad_toggle, name="ad_toggle"),
+    path("ads/<int:pk>/delete/", views.ad_delete, name="ad_delete"),
 ]
