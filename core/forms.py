@@ -63,18 +63,30 @@ class ChannelForm(forms.ModelForm):
 class AdvertisementForm(forms.ModelForm):
     class Meta:
         model = Advertisement
-        fields = ['name', 'placement', 'ad_code', 'is_active']
+        fields = ['name', 'client_name', 'placement', 'image_url', 'link_url', 'ad_code', 'is_active']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200',
-                'placeholder': 'e.g. Google AdSense — Homepage Banner',
+                'placeholder': 'e.g. Habesha Brewery — Homepage Banner',
+            }),
+            'client_name': forms.TextInput(attrs={
+                'class': 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200',
+                'placeholder': 'e.g. Habesha Brewery (optional)',
             }),
             'placement': forms.Select(attrs={
                 'class': 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200',
             }),
+            'image_url': forms.URLInput(attrs={
+                'class': 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200',
+                'placeholder': 'https://example.com/ad-banner.jpg',
+            }),
+            'link_url': forms.URLInput(attrs={
+                'class': 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200',
+                'placeholder': 'https://advertiser-website.com',
+            }),
             'ad_code': forms.Textarea(attrs={
                 'class': 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-200',
-                'rows': 8,
+                'rows': 6,
                 'placeholder': 'Paste your <ins class="adsbygoogle"> ... </ins> code here',
                 'spellcheck': 'false',
             }),
@@ -89,11 +101,15 @@ class AdvertisementForm(forms.ModelForm):
             raise forms.ValidationError("Name is required.")
         return value
 
-    def clean_ad_code(self):
-        value = self.cleaned_data.get('ad_code', '').strip()
-        if not value:
-            raise forms.ValidationError("Ad code is required.")
-        return value
+    def clean(self):
+        cleaned = super().clean()
+        image_url = cleaned.get('image_url', '').strip()
+        ad_code   = cleaned.get('ad_code', '').strip()
+        if not image_url and not ad_code:
+            raise forms.ValidationError(
+                "Provide either an Image URL (for a personal ad) or an Ad Code (for Google AdSense / custom HTML)."
+            )
+        return cleaned
 
 
 class ArticleSearchForm(forms.Form):

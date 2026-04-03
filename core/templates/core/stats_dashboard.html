@@ -1,0 +1,211 @@
+{% extends "core/cms_base.html" %}
+{% block title %}Site Statistics{% endblock %}
+{% block page_title %}Site Statistics{% endblock %}
+{% block page_subtitle %}Usage analytics for {{ today|date:"N j, Y" }}{% endblock %}
+
+{% block content %}
+
+<!-- ── Headline numbers ─────────────────────────────────────────── -->
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+    <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-1">Today's Views</p>
+    <p class="text-3xl font-bold text-gray-900">{{ views_today }}</p>
+    <p class="text-xs mt-1
+      {% if views_today >= views_yesterday %}text-emerald-600{% else %}text-rose-500{% endif %}">
+      {% if views_yesterday > 0 %}
+        {% if views_today >= views_yesterday %}↑{% else %}↓{% endif %}
+        vs {{ views_yesterday }} yesterday
+      {% else %}
+        {{ views_yesterday }} yesterday
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+    <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-1">Unique Visitors</p>
+    <p class="text-3xl font-bold text-gray-900">{{ unique_today }}</p>
+    <p class="text-xs text-gray-400 mt-1">sessions today</p>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+    <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-1">Last 7 Days</p>
+    <p class="text-3xl font-bold text-gray-900">{{ views_7d }}</p>
+    <p class="text-xs text-gray-400 mt-1">page views</p>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+    <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-1">Last 30 Days</p>
+    <p class="text-3xl font-bold text-gray-900">{{ views_30d }}</p>
+    <p class="text-xs text-gray-400 mt-1">page views</p>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+    <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-1">Published</p>
+    {% for s in status_counts %}{% if s.value == "published" %}
+    <p class="text-3xl font-bold text-emerald-600">{{ s.count }}</p>
+    {% endif %}{% endfor %}
+    <p class="text-xs text-gray-400 mt-1">articles live</p>
+  </div>
+
+</div>
+
+<!-- ── 14-day chart ──────────────────────────────────────────────── -->
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
+  <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Daily Page Views — Last 14 Days</h3>
+  <div class="flex items-end gap-1 h-32">
+    {% for day in chart_data %}
+    {% with pct=day.count|floatformat:0 %}
+    <div class="flex-1 flex flex-col items-center gap-1 group">
+      <div class="relative flex-1 flex items-end w-full">
+        <div class="w-full rounded-t-sm transition-all duration-300"
+             style="height: {% if chart_max > 0 %}{% widthratio day.count chart_max 100 %}%{% else %}0%{% endif %}; background: linear-gradient(135deg, #0f4c81, #1e3a8a); min-height: 2px;">
+        </div>
+        <!-- Tooltip -->
+        <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-10">
+          {{ day.count }}
+        </div>
+      </div>
+      <span class="text-gray-300 text-[9px] leading-none text-center" style="writing-mode:vertical-rl;transform:rotate(180deg);height:32px;">
+        {{ day.date }}
+      </span>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ── Article status breakdown ──────────────────────────────────── -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Article Status Breakdown</h3>
+    <div class="space-y-3">
+      {% for s in status_counts %}
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-sm font-medium text-gray-700">{{ s.label }}</span>
+          <span class="text-sm font-bold text-gray-900">{{ s.count }}</span>
+        </div>
+        <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div class="h-full rounded-full transition-all"
+               style="width: {{ s.pct }}%;
+                      background:
+                        {% if s.value == 'published' %}#10b981
+                        {% elif s.value == 'in_review' %}#3b82f6
+                        {% elif s.value == 'submitted' %}#f59e0b
+                        {% elif s.value == 'rejected' %}#ef4444
+                        {% else %}#9ca3af{% endif %};">
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Top pages -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Top Pages — Last 30 Days</h3>
+    {% if top_pages %}
+    <div class="space-y-2">
+      {% for page in top_pages %}
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-gray-400 w-5 text-right shrink-0">{{ forloop.counter }}</span>
+        <span class="text-xs text-gray-700 font-mono truncate flex-1">{{ page.path }}</span>
+        <span class="text-xs font-bold text-gray-900 shrink-0">{{ page.count }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-400">No page view data yet. Views are recorded as visitors browse the site.</p>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- ── Top articles ───────────────────────────────────────────────── -->
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-6">
+  <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Most-Read Articles (All Time)</h3>
+  </div>
+  {% if top_articles %}
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b border-gray-50 bg-gray-50/50 text-xs text-gray-400 uppercase tracking-widest">
+        <th class="px-5 py-3 text-left">#</th>
+        <th class="px-5 py-3 text-left">Title</th>
+        <th class="px-5 py-3 text-left hidden md:table-cell">Author</th>
+        <th class="px-5 py-3 text-right">Views</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-50">
+      {% for article in top_articles %}
+      <tr class="hover:bg-gray-50 transition">
+        <td class="px-5 py-3 text-gray-400 text-xs">{{ forloop.counter }}</td>
+        <td class="px-5 py-3">
+          <a href="{% url 'core:article_detail' article.slug %}" target="_blank"
+             class="font-medium text-gray-900 hover:text-brand transition line-clamp-1">
+            {{ article.title }}
+          </a>
+          {% if article.category %}
+          <span class="text-xs text-gray-400">{{ article.category.name }}</span>
+          {% endif %}
+        </td>
+        <td class="px-5 py-3 text-gray-500 text-xs hidden md:table-cell">
+          {{ article.author.get_full_name|default:article.author.email|default:"—" }}
+        </td>
+        <td class="px-5 py-3 text-right">
+          <span class="font-bold text-gray-900">{{ article.views_count }}</span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="px-5 py-10 text-center text-sm text-gray-400">No published articles yet.</div>
+  {% endif %}
+</div>
+
+<!-- ── User activity ─────────────────────────────────────────────── -->
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+  <div class="px-5 py-4 border-b border-gray-50">
+    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Writer Activity</h3>
+  </div>
+  {% if user_activity %}
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b border-gray-50 bg-gray-50/50 text-xs text-gray-400 uppercase tracking-widest">
+        <th class="px-5 py-3 text-left">Writer</th>
+        <th class="px-5 py-3 text-left hidden md:table-cell">Role</th>
+        <th class="px-5 py-3 text-right">Articles</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-50">
+      {% for u in user_activity %}
+      <tr class="hover:bg-gray-50 transition">
+        <td class="px-5 py-3">
+          <div class="flex items-center gap-3">
+            <div class="h-7 w-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                 style="background: linear-gradient(135deg, #0f4c81, #1e3a8a);">
+              {{ u.email|first|upper }}
+            </div>
+            <div>
+              <p class="font-medium text-gray-900 text-sm">{{ u.get_full_name|default:u.email }}</p>
+              <p class="text-xs text-gray-400">{{ u.email }}</p>
+            </div>
+          </div>
+        </td>
+        <td class="px-5 py-3 text-xs text-gray-500 capitalize hidden md:table-cell">{{ u.role }}</td>
+        <td class="px-5 py-3 text-right">
+          <span class="font-bold text-gray-900">{{ u.article_count }}</span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="px-5 py-10 text-center text-sm text-gray-400">No writer activity yet.</div>
+  {% endif %}
+</div>
+
+{% endblock %}

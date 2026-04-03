@@ -66,7 +66,7 @@
 
 {% if ads.homepage_banner %}
 <div class="max-w-7xl mx-auto px-4 mt-5 flex justify-center">
-  {{ ads.homepage_banner.ad_code|safe }}
+  {{ ads.homepage_banner.rendered_html|safe }}
 </div>
 {% endif %}
 
@@ -182,7 +182,7 @@
 
     {% if ads.homepage_banner %}
     <div class="flex justify-center mb-10">
-      {{ ads.homepage_banner.ad_code|safe }}
+      {{ ads.homepage_banner.rendered_html|safe }}
     </div>
     {% endif %}
 
@@ -291,7 +291,7 @@
 
     {% if ads.homepage_sidebar %}
     <div class="flex justify-center">
-      {{ ads.homepage_sidebar.ad_code|safe }}
+      {{ ads.homepage_sidebar.rendered_html|safe }}
     </div>
     {% endif %}
 

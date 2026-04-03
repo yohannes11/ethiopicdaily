@@ -44,4 +44,7 @@ urlpatterns = [
     path("ads/<int:pk>/edit/", views.ad_edit, name="ad_edit"),
     path("ads/<int:pk>/toggle/", views.ad_toggle, name="ad_toggle"),
     path("ads/<int:pk>/delete/", views.ad_delete, name="ad_delete"),
+
+    # Site statistics — admins only
+    path("stats/", views.stats_dashboard, name="stats_dashboard"),
 ]

@@ -94,7 +94,7 @@
 
   {% if ads.article_top %}
   <div class="flex justify-center mb-8">
-    {{ ads.article_top.ad_code|safe }}
+    {{ ads.article_top.rendered_html|safe }}
   </div>
   {% endif %}
 
@@ -166,7 +166,7 @@
 
   {% if ads.article_bottom %}
   <div class="flex justify-center mt-10 mb-2">
-    {{ ads.article_bottom.ad_code|safe }}
+    {{ ads.article_bottom.rendered_html|safe }}
   </div>
   {% endif %}
 

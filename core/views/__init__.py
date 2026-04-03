@@ -21,6 +21,7 @@ from .telegram import (
     channel_delete,
 )
 from .ads import ad_list, ad_create, ad_edit, ad_toggle, ad_delete
+from .stats import stats_dashboard
 
 __all__ = [
     "homepage", "search", "article_detail", "react_to_article",
@@ -30,4 +31,5 @@ __all__ = [
     "fetch_telegram", "telegram_import_list", "approve_import", "reject_import",
     "channel_list", "channel_create", "channel_toggle", "channel_delete",
     "ad_list", "ad_create", "ad_edit", "ad_toggle", "ad_delete",
+    "stats_dashboard",
 ]
