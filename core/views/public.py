@@ -17,8 +17,7 @@ def homepage(request):
     exclude_pk = featured.pk if featured else 0
     sub_hero = published.exclude(pk=exclude_pk).order_by("-published_at")[:3]
 
-    exclude_pks = [exclude_pk] + [a.pk for a in sub_hero]
-    latest = published.exclude(pk__in=exclude_pks).order_by("-published_at")[:8]
+    latest = published.exclude(pk=exclude_pk).order_by("-published_at")[:8]
 
     trending = published.select_related("category").order_by("-views_count")[:6]
     most_read = published.select_related("category").order_by("-views_count")[:5]
